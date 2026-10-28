@@ -35,6 +35,8 @@ https://github.com/Legerdo/unity-local-asset-search.git#v0.2.2
 
 Alternatively, install the `.tgz` from the [release](https://github.com/Legerdo/unity-local-asset-search/releases/tag/v0.2.2) as a tarball, or select a local checkout's `package.json` with package-from-disk.
 
+The public `v0.2.2` tag passed a clean Unity 6.3 installation with a new Python environment, six imported samples, real indexing/search/filter/MCP checks and regression tests. See the [clean-install record](Documentation~/RELEASE-VALIDATION.md) for evidence and exclusions.
+
 ### First search
 
 1. Open `Tools > Local Asset Search > Setup & index` and switch the header language to English.

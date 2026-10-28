@@ -36,6 +36,8 @@ https://github.com/Legerdo/unity-local-asset-search.git#v0.2.2
 
 Git 설치가 어려우면 [릴리스](https://github.com/Legerdo/unity-local-asset-search/releases/tag/v0.2.2)의 `.tgz`를 내려받아 tarball 설치 메뉴를 사용합니다. 저장소를 직접 받은 경우 package-from-disk 메뉴에서 `package.json`을 선택합니다.
 
+공개 `v0.2.2` 태그를 새 Unity 6.3 프로젝트에 직접 설치해 새 Python 환경 준비, 샘플 6개 색인·검색·필터·MCP와 회귀 검사를 통과했습니다. [새 설치 검증 기록](Documentation~/RELEASE-VALIDATION.md)에 확인 범위와 실제 결과를 남겼습니다.
+
 ### 처음 검색하기
 
 1. `Tools > Local Asset Search > 설정 · 색인`을 엽니다.

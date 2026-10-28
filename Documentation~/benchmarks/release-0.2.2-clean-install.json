@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-28",
+  "repository": "https://github.com/Legerdo/unity-local-asset-search",
+  "tag": "v0.2.2",
+  "tested_commit": "502a4c729ebce33862c8dc2e7536508235d01f4e",
+  "old_project_contents_removed": true,
+  "new_project_created_by": "Unity CLI 1.0.0-beta.14, com.unity.template.3d, bare, no cloud",
+  "upm_source": "git",
+  "upm_requested_url": "https://github.com/Legerdo/unity-local-asset-search.git#v0.2.2",
+  "new_python_environment": true,
+  "existing_external_model_reused": true,
+  "new_model_download_tested_in_this_run": false,
+  "fresh_environment_entrypoint": "BackendClient.SetupAsync",
+  "sample_import_entrypoint": "UnityEditor.PackageManager.UI.Sample.Import",
+  "sample_flow_entrypoints": [
+    "AssetCollector.Scan",
+    "AssetCollector.PrepareAsync",
+    "BackendClient.StartAsync",
+    "BackendClient.WarmupAsync",
+    "BackendClient.ClearAsync",
+    "BackendClient.IndexAsync",
+    "BackendClient.SearchAsync"
+  ],
+  "tests": {
+    "backend": 19,
+    "agent": 2,
+    "paired_locale_keys": 101,
+    "package_validation": "passed"
+  },
+  "sample_validation": {
+    "unity": "6000.3.24f1",
+    "packageVersion": "0.2.2",
+    "packageSource": "Git",
+    "sampleImported": true,
+    "koreanUi": true,
+    "englishUi": true,
+    "unicode": true,
+    "filters": true,
+    "mcp": true,
+    "passed": true,
+    "sampleAssets": 6,
+    "indexed": 6,
+    "unchangedSkipped": 6,
+    "indexSeconds": 5.6508413,
+    "firstResults": [
+      {
+        "path": "Assets/Samples/Local Asset Embedding Search/0.2.2/Quick Start/Sword.txt",
+        "kind": "text",
+        "score": 0.8070632219314575,
+        "offset": 0.0
+      },
+      {
+        "path": "Assets/Samples/Local Asset Embedding Search/0.2.2/Quick Start/RedSquare.png",
+        "kind": "image",
+        "score": 0.8409454822540283,
+        "offset": 0.0
+      },
+      {
+        "path": "Assets/Samples/Local Asset Embedding Search/0.2.2/Quick Start/LowTone.wav",
+        "kind": "audio",
+        "score": 0.7822476625442505,
+        "offset": 0.0
+      }
+    ]
+  },
+  "mcp_validation": {
+    "transport": "MCP stdio",
+    "checks": [
+      {
+        "kind": "text",
+        "top_path": "Assets/Samples/Local Asset Embedding Search/0.2.2/Quick Start/Sword.txt",
+        "score": 0.8070632219314575
+      },
+      {
+        "kind": "image",
+        "top_path": "Assets/Samples/Local Asset Embedding Search/0.2.2/Quick Start/RedSquare.png",
+        "score": 0.8409454822540283
+      },
+      {
+        "kind": "audio",
+        "top_path": "Assets/Samples/Local Asset Embedding Search/0.2.2/Quick Start/LowTone.wav",
+        "score": 0.7822476625442505
+      }
+    ],
+    "advanced_filters": true,
+    "passed": true
+  },
+  "timing_note": "Smoke-test indexSeconds includes reloading after ClearAsync. This is not a warm steady-state benchmark.",
+  "ui_scope": "UXML/USS and Korean/English bindings constructed in Unity batch mode; no fresh interactive visual acceptance in this run.",
+  "limitations": [
+    "Only Unity 6000.3.24f1 in this clean-install run",
+    "Original model weights reused; fresh model download was tested in earlier development",
+    "Audio sample is an authored tone, not effect-search accuracy",
+    "No real 1k/5k/10k corpus or long-duration test"
+  ],
+  "temporary_editor_harness_removed": true,
+  "post_cleanup_compile_exit_code": 0,
+  "unity_shutdown_warnings": [
+    "debugger-agent: Unable to listen on 4700",
+    "abort_threads: Failed aborting id (thread IDs omitted)"
+  ]
+}
