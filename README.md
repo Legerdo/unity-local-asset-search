@@ -38,6 +38,8 @@ Git 설치가 어려우면 [릴리스](https://github.com/Legerdo/unity-local-as
 
 공개 `v0.2.2` 태그를 새 Unity 6.3 프로젝트에 직접 설치해 새 Python 환경 준비, 샘플 6개 색인·검색·필터·MCP와 회귀 검사를 통과했습니다. [새 설치 검증 기록](Documentation~/RELEASE-VALIDATION.md)에 확인 범위와 실제 결과를 남겼습니다.
 
+후속 [CLI UI 이벤트 검사](Documentation~/UI-VALIDATION.md)에서는 실제 버튼·입력 변경 경로 16단계도 통과했습니다. 마우스 좌표 조작이나 백엔드 작업 API 직접 호출을 사용하지 않았습니다.
+
 ### 처음 검색하기
 
 1. `Tools > Local Asset Search > 설정 · 색인`을 엽니다.

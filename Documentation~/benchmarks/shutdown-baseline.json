@@ -1,0 +1,28 @@
+{
+  "unity": "6000.3.24f1",
+  "package_installed": false,
+  "manifest_sha256": "fe1239b5de46c8876d2c7f64cdc8d38895fcb00f6511501b57b1ced390229bf7",
+  "exit_code": 0,
+  "abort_warning_count": 4,
+  "debugger_socket_identifiers": [
+    "4692"
+  ],
+  "configured_debugger_address": [
+    "127.0.0.1:56020"
+  ],
+  "comparison": "Same template/dependency versions as UnityGemma except com.local.embedding-search is absent",
+  "source_revision": "0b594224e67d7832012ffe7c458cd0e0bb239894",
+  "number_is_port": false,
+  "exact_thread_owners_identified": false,
+  "package_ui_run": {
+    "marker": "UI_EVENT_FLOW_PASS",
+    "abort_warning_count": 4,
+    "debugger_socket_identifiers": [
+      "4620"
+    ],
+    "configured_debugger_address": [
+      "127.0.0.1:56744"
+    ],
+    "backend_processes_after_editor_exit": 0
+  }
+}

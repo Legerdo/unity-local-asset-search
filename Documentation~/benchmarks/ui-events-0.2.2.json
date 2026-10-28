@@ -1,0 +1,112 @@
+{
+  "unity": "6000.3.24f1",
+  "package": "com.local.embedding-search@0.2.2",
+  "mode": "UI Toolkit NavigationSubmitEvent and ChangeEvent; no direct search/index/connect API calls",
+  "passed": true,
+  "error": "",
+  "steps": [
+    {
+      "name": "connect button",
+      "notice": "연결 완료 · cuda. 검색할 자료를 선택하세요.",
+      "first": "",
+      "results": 0
+    },
+    {
+      "name": "sample button",
+      "notice": "샘플을 추가했습니다. 자료 수 확인 → 색인을 눌러보세요.",
+      "first": "",
+      "results": 0
+    },
+    {
+      "name": "preview 6 samples",
+      "notice": "6개의 자료를 확인했습니다. 색인 버튼을 눌러 검색을 준비하세요.",
+      "first": "",
+      "results": 0
+    },
+    {
+      "name": "clear generated index button",
+      "notice": "생성된 색인을 비웠습니다. 원본 에셋은 그대로입니다.",
+      "first": "",
+      "results": 0
+    },
+    {
+      "name": "index button: 6 updated",
+      "notice": "색인 완료 · 6개 갱신, 0개 변경 없음. 이제 검색할 수 있습니다.",
+      "first": "",
+      "results": 0
+    },
+    {
+      "name": "index button: 6 skipped",
+      "notice": "색인 완료 · 0개 갱신, 6개 변경 없음. 이제 검색할 수 있습니다.",
+      "first": "",
+      "results": 0
+    },
+    {
+      "name": "image search button",
+      "notice": "2개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요.",
+      "first": "RedSquare",
+      "results": 2
+    },
+    {
+      "name": "minimum score 0.8",
+      "notice": "1개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요.",
+      "first": "RedSquare",
+      "results": 1
+    },
+    {
+      "name": "minimum score 0.95",
+      "notice": "0개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요.",
+      "first": "",
+      "results": 0
+    },
+    {
+      "name": "path and extension",
+      "notice": "1개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요.",
+      "first": "BlueCircle",
+      "results": 1
+    },
+    {
+      "name": "name sorting",
+      "notice": "2개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요.",
+      "first": "BlueCircle",
+      "results": 2
+    },
+    {
+      "name": "text search",
+      "notice": "2개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요.",
+      "first": "Sword",
+      "results": 2
+    },
+    {
+      "name": "audio search",
+      "notice": "2개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요.",
+      "first": "LowTone",
+      "results": 2
+    },
+    {
+      "name": "English UI search",
+      "notice": "Found 2 results. Select one to inspect the source asset.",
+      "first": "LowTone",
+      "results": 2
+    },
+    {
+      "name": "stop button",
+      "notice": "백엔드를 중지했습니다. 모델과 장치 설정을 변경할 수 있습니다.",
+      "first": "LowTone",
+      "results": 2
+    },
+    {
+      "name": "reconnect button",
+      "notice": "연결 완료 · cuda. 검색할 자료를 선택하세요.",
+      "first": "LowTone",
+      "results": 2
+    }
+  ],
+  "tested_git_commit": "502a4c729ebce33862c8dc2e7536508235d01f4e",
+  "date": "2026-10-28",
+  "computer_use_for_test_actions": false,
+  "pointer_hit_testing_verified": false,
+  "remaining_search_backend_processes": 0,
+  "setup_note": "The initially opened inspection Editor was closed with CLI --force because it lacked Pipeline. That forced close is excluded from shutdown evidence. UI event validation ran in a fresh process and requested EditorApplication.Exit(0).",
+  "harness_adjustment": "The first run needed a frame/layout delay after tab switching. Assertions were retained; the final run passed."
+}

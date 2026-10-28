@@ -37,6 +37,8 @@ Alternatively, install the `.tgz` from the [release](https://github.com/Legerdo/
 
 The public `v0.2.2` tag passed a clean Unity 6.3 installation with a new Python environment, six imported samples, real indexing/search/filter/MCP checks and regression tests. See the [clean-install record](Documentation~/RELEASE-VALIDATION.md) for evidence and exclusions.
 
+A follow-up [CLI UI event test](Documentation~/UI-VALIDATION.md) passed 16 button/input steps without coordinate automation or direct backend operation calls. Pointer hit testing and visual acceptance remain outside that test.
+
 ### First search
 
 1. Open `Tools > Local Asset Search > Setup & index` and switch the header language to English.

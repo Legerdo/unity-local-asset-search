@@ -28,7 +28,7 @@ Unity 6000.3.24f1, Windows 11, Python 3.13, NVIDIA CUDA 환경입니다. Unity�
 
 최종 샘플 실행 마커는 `GITHUB_SAMPLE_VALIDATION_PASS`입니다. [구조화된 결과](benchmarks/release-0.2.2-clean-install.json)에 커밋·진입점·검색 결과와 제한을 남겼습니다. 검증용으로 임시 추가한 Editor 스크립트는 종료 후 제거하고, 새 프로젝트에는 설치한 패키지·샘플·환경·검색 인덱스를 남깁니다.
 
-임시 Editor 스크립트를 제거한 뒤 `unity run <project> --timeout 180 -- -logFile <log>`를 실행했고 종료 코드 0과 `Exiting batchmode successfully`를 확인했습니다. C# 컴파일 오류는 없었습니다. Unity 종료 로그에는 `debugger-agent: Unable to listen on 4700`과 일부 `abort_threads` 경고가 남았습니다. 이 엔진 종료 경고를 해결했다고 주장하지 않습니다.
+임시 Editor 스크립트를 제거한 뒤 `unity run <project> --timeout 180 -- -logFile <log>`를 실행했고 종료 코드 0과 `Exiting batchmode successfully`를 확인했습니다. C# 컴파일 오류는 없었습니다. Unity 종료 로그에는 `debugger-agent: Unable to listen on 4700`과 일부 `abort_threads` 경고가 남았습니다. 후속 대조에서 패키지 없이도 재현됐으며, 숫자 4700은 TCP 포트가 아닌 소켓 식별자임을 확인했습니다. [UI 이벤트 검사와 종료 경고 분석](UI-VALIDATION.md)에 정정과 근거를 기록했습니다.
 
 ## 검증 명령과 재현
 
