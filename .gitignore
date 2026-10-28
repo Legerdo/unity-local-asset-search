@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+env/
+.cache/
+*.safetensors
+*.gguf
+*.onnx
+*.sqlite3*
+ready.json
+UserSettings/
+Library/
+Temp/
+Logs/
+work/
+dist/

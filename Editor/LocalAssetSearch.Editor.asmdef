@@ -1,0 +1,6 @@
+{
+  "name": "LocalAssetSearch.Editor",
+  "rootNamespace": "LocalAssetSearch",
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}
