@@ -8,6 +8,8 @@ env/
 *.onnx
 *.sqlite3*
 ready.json
+agent-connection.json
+agent-scope.json*
 UserSettings/
 Library/
 Temp/

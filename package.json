@@ -1,9 +1,10 @@
 {
   "name": "com.local.embedding-search",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Local Asset Embedding Search",
   "description": "Editor-only text, image and audio asset search using a separate local EmbeddingGemma 2 backend. No Sentis dependency.",
   "unity": "2021.3",
   "author": { "name": "Local Tools" },
-  "keywords": ["editor", "search", "embeddings"]
+  "keywords": ["editor", "search", "embeddings"],
+  "samples": [{ "displayName": "Quick Start", "description": "Small text, image and audio fixtures for learning the search workflow.", "path": "Samples~/QuickStart" }]
 }

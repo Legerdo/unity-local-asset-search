@@ -15,11 +15,12 @@ import sqlite3
 import threading
 import time
 from contextlib import contextmanager
+from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 MODEL_ID = "google/embeddinggemma-2"
 MODEL_REVISION = "914f7f89142e33e77833254d9c9b90c3cef7303b"
-RECIPE = "asset-search-v1:text1800-overlap200,image1024,audio20s-overlap2-16k"
+RECIPE = "asset-search-v2-fp32-l2:text1800-overlap200,image1024,audio20s-overlap2-16k"
 TEXT_EXTS = {".txt", ".md", ".json", ".csv", ".xml", ".yaml", ".yml", ".cs", ".shader", ".compute", ".uss", ".uxml", ".lua"}
 MAX_BODY = 8 * 1024 * 1024
 
@@ -77,6 +78,15 @@ def chunks(text, size=1800, overlap=200):
             break
 
 
+def normalized_vectors(vectors, count, dimension):
+    import numpy as np
+    vectors = np.asarray(vectors, dtype="<f4").reshape(count, -1)
+    norms = np.linalg.norm(vectors, axis=1)
+    if vectors.shape != (count, dimension) or not np.isfinite(vectors).all() or not ((norms > .99) & (norms < 1.01)).all():
+        raise ValueError("Model returned an invalid embedding")
+    return vectors / norms[:, None]
+
+
 class Engine:
     def __init__(self, args):
         self.project = Path(args.project_root).resolve(strict=True)
@@ -90,7 +100,13 @@ class Engine:
         self.model_dir = validate_model(args.model_dir)
         self.dim = args.dimensions
         self.device = args.device
+        self.batch_profile = getattr(args, "batch_profile", "balanced")
         self.model = None
+        self.query_cache = OrderedDict()
+        self.load_seconds = 0
+        self.hash_seconds = 0
+        self.job_started = None
+        self.elapsed_seconds = 0
         self.lock = threading.Lock()
         self.job_lock = threading.Lock()
         self.cancel = threading.Event()
@@ -116,6 +132,7 @@ class Engine:
     def load(self):
         if self.model is not None:
             return
+        started = time.perf_counter()
         os.environ["HF_HUB_OFFLINE"] = "1"
         os.environ["TRANSFORMERS_OFFLINE"] = "1"
         import torch
@@ -136,6 +153,7 @@ class Engine:
             h.update(p.relative_to(self.model_dir).as_posix().encode())
             h.update(digest_file(p).encode())
         fingerprint = h.hexdigest()
+        self.hash_seconds = time.perf_counter() - started
         with self.db() as db:
             row = db.execute("SELECT value FROM meta WHERE key='fingerprint'").fetchone()
             if row and row[0] != fingerprint:
@@ -150,16 +168,39 @@ class Engine:
         self.fingerprint = fingerprint
         with self.db() as db:
             db.execute("INSERT OR REPLACE INTO meta VALUES ('fingerprint',?)", (fingerprint,))
+        self.load_seconds = time.perf_counter() - started
+
+    def status(self):
+        with self.db() as db:
+            count = db.execute("SELECT count(*) FROM assets").fetchone()[0]
+        values = dict(self.snapshot(), count=count, device=self.device, dimensions=self.dim,
+                      model_loaded=self.model is not None, load_seconds=self.load_seconds,
+                      hash_seconds=self.hash_seconds, elapsed_seconds=self.elapsed_seconds)
+        if values["running"] and self.job_started is not None:
+            values["elapsed_seconds"] = time.perf_counter() - self.job_started
+        if self.model is not None and self.device == "cuda":
+            import torch
+            values["gpu_allocated_mb"] = torch.cuda.memory_allocated() / 1048576
+            values["gpu_peak_mb"] = torch.cuda.max_memory_allocated() / 1048576
+        return values
+
+    def encode_many(self, data, prompt="", batch_size=16):
+        import numpy as np
+        import torch
+        self.load()
+        try:
+            vectors = np.asarray(self.model.encode(data, prompt=prompt, batch_size=batch_size,
+                normalize_embeddings=True, truncate_dim=self.dim, show_progress_bar=False), dtype="<f4").reshape(len(data), -1)
+        except torch.OutOfMemoryError:
+            if batch_size <= 1:
+                raise
+            if self.device == "cuda":
+                torch.cuda.empty_cache()
+            return self.encode_many(data, prompt, max(1, batch_size // 2))
+        return normalized_vectors(vectors, len(data), self.dim)
 
     def encode(self, data, prompt=""):
-        import numpy as np
-        self.load()
-        vec = np.asarray(self.model.encode(data, prompt=prompt, normalize_embeddings=True,
-                                          truncate_dim=self.dim, show_progress_bar=False), dtype="<f4").reshape(-1)
-        norm = float(np.linalg.norm(vec))
-        if len(vec) != self.dim or not np.isfinite(vec).all() or norm < 0.99 or norm > 1.01:
-            raise ValueError("Model returned an invalid embedding")
-        return vec
+        return self.encode_many([data], prompt, 1)[0]
 
     def source(self, item):
         path = Path(item["source"]).resolve(strict=True)
@@ -177,21 +218,21 @@ class Engine:
             raise ValueError("Unsupported kind")
         return path
 
-    def parts(self, item, source):
+    def inputs(self, item, source):
         if item["kind"] == "text":
             if source.suffix.lower() not in TEXT_EXTS or source.stat().st_size > 2 * 1024 * 1024:
                 raise ValueError("Unsupported text extension or text exceeds 2 MB")
             text = source.read_text("utf-8-sig")
             title = Path(item["path"]).name
             for offset, content in chunks(text):
-                yield offset, self.encode("title: " + title + " | text: " + content)
+                yield offset, "title: " + title + " | text: " + content
         elif item["kind"] == "image":
             from PIL import Image
             Image.MAX_IMAGE_PIXELS = 32_000_000
             with Image.open(source) as image:
                 image = image.convert("RGB")
                 image.thumbnail((1024, 1024))
-                yield 0, self.encode({"image": image})
+                yield 0, {"image": image.copy()}
         else:
             import numpy as np
             import soundfile as sf
@@ -211,7 +252,7 @@ class Engine:
                         break
                     if audio.samplerate != 16000:
                         samples = librosa.resample(samples, orig_sr=audio.samplerate, target_sr=16000)
-                    yield offset, self.encode({"audio": {"array": np.asarray(samples), "sampling_rate": 16000}})
+                    yield offset, {"audio": {"array": np.asarray(samples), "sampling_rate": 16000}}
                     if offset + 20 >= duration:
                         break
 
@@ -230,15 +271,34 @@ class Engine:
             if self.job["running"]:
                 raise ValueError("An indexing job is already running")
             self.cancel.clear()
+            self.job_started = time.perf_counter()
             self.job = {"running": True, "done": 0, "total": len(items), "updated": 0, "skipped": 0,
                         "failed": 0, "cancelled": False, "current": "Loading model", "errors": []}
         threading.Thread(target=self.index, args=(items,), daemon=True).start()
         return self.snapshot()
 
+    def record_error(self, item, ex):
+        with self.job_lock:
+            self.job["failed"] += 1
+            self.job["done"] += 1
+            self.job["errors"].append(item["path"] + ": " + str(ex))
+
+    def write_asset(self, item, checksum, vectors):
+        if self.cancel.is_set():
+            raise InterruptedError("Cancelled")
+        with self.db() as db:
+            db.execute("DELETE FROM vectors WHERE guid=?", (item["guid"],))
+            db.execute("INSERT OR REPLACE INTO assets VALUES (?,?,?,?)", (item["guid"], item["path"], item["kind"], checksum))
+            db.executemany("INSERT INTO vectors VALUES (?,?,?,?)", [(item["guid"], n, offset, vector.tobytes()) for n, (offset, vector) in enumerate(vectors)])
+        with self.job_lock:
+            self.job["updated"] += 1
+            self.job["done"] += 1
+
     def index(self, items):
         try:
             with self.lock:
                 self.load()
+                changed = {"text": [], "image": [], "audio": []}
                 for item in items:
                     if self.cancel.is_set():
                         break
@@ -250,28 +310,53 @@ class Engine:
                         with self.db() as db:
                             row = db.execute("SELECT hash FROM assets WHERE guid=?", (item["guid"],)).fetchone()
                         if row and row[0] == checksum:
-                            field = "skipped"
+                            with self.job_lock:
+                                self.job["skipped"] += 1
+                                self.job["done"] += 1
                         else:
-                            vectors = []
-                            for offset, vec in self.parts(item, source):
-                                if self.cancel.is_set():
-                                    raise InterruptedError("Cancelled")
-                                vectors.append((item["guid"], len(vectors), offset, vec.tobytes()))
-                            with self.db() as db:
-                                db.execute("DELETE FROM vectors WHERE guid=?", (item["guid"],))
-                                db.execute("INSERT OR REPLACE INTO assets VALUES (?,?,?,?)", (item["guid"], item["path"], item["kind"], checksum))
-                                db.executemany("INSERT INTO vectors VALUES (?,?,?,?)", vectors)
-                            field = "updated"
-                        with self.job_lock:
-                            self.job[field] += 1
+                            changed[item["kind"]].append((item, source, checksum))
                     except InterruptedError:
                         break
                     except Exception as ex:
+                        self.record_error(item, ex)
+                text_batch = 64 if self.device == "cuda" else 8
+                for kind, batch_size in (("text", text_batch), ("image", 4), ("audio", 2)):
+                    if self.batch_profile == "single":
+                        batch_size = 1
+                    for start in range(0, len(changed[kind]), batch_size):
+                        if self.cancel.is_set():
+                            raise InterruptedError("Cancelled")
+                        prepared, documents = [], []
+                        for item, source, checksum in changed[kind][start:start + batch_size]:
+                            try:
+                                parts = list(self.inputs(item, source))
+                                prepared.append((item, checksum, parts, len(documents)))
+                                documents.extend(data for _, data in parts)
+                            except InterruptedError:
+                                raise
+                            except Exception as ex:
+                                self.record_error(item, ex)
+                        if not documents:
+                            continue
                         with self.job_lock:
-                            self.job["failed"] += 1
-                            self.job["errors"].append(item["path"] + ": " + str(ex))
-                    with self.job_lock:
-                        self.job["done"] += 1
+                            self.job["current"] = prepared[0][0]["path"]
+                        try:
+                            vectors = self.encode_many(documents, batch_size=batch_size)
+                        except Exception:
+                            # Isolate an invalid item instead of failing unrelated assets in its batch.
+                            for item, checksum, parts, _ in prepared:
+                                try:
+                                    single = self.encode_many([data for _, data in parts], batch_size=1)
+                                    self.write_asset(item, checksum, zip((o for o, _ in parts), single))
+                                except InterruptedError:
+                                    raise
+                                except Exception as ex:
+                                    self.record_error(item, ex)
+                        else:
+                            for item, checksum, parts, offset in prepared:
+                                self.write_asset(item, checksum, zip((o for o, _ in parts), vectors[offset:offset + len(parts)]))
+        except InterruptedError:
+            pass
         except Exception as ex:
             with self.job_lock:
                 self.job["errors"].append(str(ex))
@@ -280,6 +365,7 @@ class Engine:
                 self.job["cancelled"] = self.cancel.is_set()
                 self.job["running"] = False
                 self.job["current"] = ""
+                self.elapsed_seconds = time.perf_counter() - self.job_started
 
     def search(self, body):
         import numpy as np
@@ -290,32 +376,75 @@ class Engine:
         if kind not in ("all", "text", "image", "audio"):
             raise ValueError("Invalid kind")
         top = max(1, min(int(body.get("top", 20)), 100))
+        minimum = float(body.get("minScore", -1))
+        order = body.get("sort", "similarity")
+        path_contains = body.get("pathContains", "").strip()
+        extensions = body.get("extensions", "").strip()
+        if not -1 <= minimum <= 1 or order not in ("similarity", "name", "path"):
+            raise ValueError("Invalid similarity threshold or sort")
+        if len(path_contains) > 256 or len(extensions) > 256:
+            raise ValueError("Path/extension filter exceeds 256 characters")
+        suffixes = ["." + value.strip().lower().lstrip(".") for value in extensions.split(",") if value.strip()]
+        if any(not suffix[1:].isalnum() for suffix in suffixes) or len(suffixes) > 16:
+            raise ValueError("Use up to 16 comma-separated file extensions, such as png,jpg")
         if self.snapshot()["running"]:
             raise ValueError("Indexing is running; wait or cancel first")
         with self.lock:
             prefix = "task: code retrieval | query: " if body.get("code", False) else "task: search result | query: "
-            vec = self.encode(query, prompt=prefix)
+            self.load()
+            cache_key = (prefix, query)
+            cached = cache_key in self.query_cache
+            if not cached:
+                self.query_cache[cache_key] = self.encode(query, prompt=prefix)
+                if len(self.query_cache) > 64:
+                    self.query_cache.popitem(last=False)
+            self.query_cache.move_to_end(cache_key)
+            vec = self.query_cache[cache_key]
             best = {}
             roots = body.get("roots", [])
             excluded = body.get("excluded", [])
-            # Stream the SQLite vectors so many text/audio chunks cannot exhaust RAM.
+            conditions, parameters = [], []
+            if kind != "all":
+                conditions.append("a.kind=?")
+                parameters.append(kind)
+            if path_contains:
+                conditions.append("instr(lower(a.path),lower(?))>0")
+                parameters.append(path_contains)
+            if suffixes:
+                conditions.append("(" + " OR ".join("substr(lower(a.path),-?)=?" for _ in suffixes) + ")")
+                for suffix in suffixes:
+                    parameters.extend((len(suffix), suffix))
+            def scoped(paths):
+                clauses = []
+                for root in paths:
+                    prefix_path = root.rstrip("/") + "/"
+                    clauses.append("(a.path=? OR substr(a.path,1,?)=?)")
+                    parameters.extend((root, len(prefix_path), prefix_path))
+                return " OR ".join(clauses)
+            if roots:
+                conditions.append("(" + scoped(roots) + ")")
+            if excluded:
+                conditions.append("NOT (" + scoped(excluded) + ")")
+            # Filter before reading vector blobs, then stream bounded chunks for exact ranking.
             with self.db() as db:
                 cursor = db.execute("SELECT a.guid,a.path,a.kind,v.offset,v.vector FROM assets a JOIN vectors v ON a.guid=v.guid"
-                                    + (" WHERE a.kind=?" if kind != "all" else ""), (kind,) if kind != "all" else ())
+                                    + (" WHERE " + " AND ".join(conditions) if conditions else ""), parameters)
                 while block := cursor.fetchmany(2048):
                     scores = np.stack([np.frombuffer(r[4], dtype="<f4") for r in block]) @ vec
                     for row, score in zip(block, scores):
+                        if score < minimum:
+                            continue
                         guid, path, item_kind, offset, _ = row
-                        if roots and not any(path == r or path.startswith(r.rstrip("/") + "/") for r in roots):
-                            continue
-                        if any(path == r or path.startswith(r.rstrip("/") + "/") for r in excluded):
-                            continue
                         if not (self.project / path).is_file():
                             continue
                         if guid not in best or score > best[guid]["score"]:
                             best[guid] = {"guid": guid, "path": path, "kind": item_kind, "offset": offset, "score": float(score)}
-            return {"results": sorted(best.values(), key=lambda r: r["score"], reverse=True)[:top],
-                    "fingerprint": self.fingerprint}
+            if order == "similarity":
+                ranked = sorted(best.values(), key=lambda r: (-r["score"], r["path"]))
+            else:
+                ranked = sorted(best.values(), key=lambda r: ((Path(r["path"]).name if order == "name" else r["path"]).casefold(), -r["score"]))
+            return {"results": ranked[:top], "matched": len(ranked),
+                    "fingerprint": self.fingerprint, "cache_hit": cached}
 
     def clear(self):
         if self.snapshot()["running"]:
@@ -326,10 +455,11 @@ class Engine:
             db.execute("DELETE FROM meta")
             self.model = None
             self.fingerprint = None
+            self.query_cache.clear()
         return {"ok": True}
 
 
-def make_handler(engine, token):
+def make_handler(engine, token, agent_token=""):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -338,8 +468,13 @@ def make_handler(engine, token):
             if self.headers.get("Origin") or self.headers.get("Host") != f"127.0.0.1:{self.server.server_port}":
                 self.reply(403, {"error": "Local editor requests only"})
                 return
-            if not hmac.compare_digest(self.headers.get("Authorization", ""), "Bearer " + token):
+            authorization = self.headers.get("Authorization", "")
+            is_agent = bool(agent_token) and hmac.compare_digest(authorization, "Bearer " + agent_token)
+            if not is_agent and not hmac.compare_digest(authorization, "Bearer " + token):
                 self.reply(401, {"error": "Unauthorized"})
+                return
+            if is_agent and self.path not in ("/status", "/search"):
+                self.reply(403, {"error": "Agent credentials allow search and status only"})
                 return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
@@ -350,15 +485,26 @@ def make_handler(engine, token):
                 if not isinstance(body, dict):
                     raise ValueError("Expected JSON object")
                 if self.path == "/status":
-                    with engine.db() as db:
-                        count = db.execute("SELECT count(*) FROM assets").fetchone()[0]
-                    result = dict(engine.snapshot(), count=count, device=engine.device, dimensions=engine.dim)
+                    result = engine.status()
+                elif self.path == "/warmup":
+                    if engine.snapshot()["running"]:
+                        raise ValueError("Indexing is running")
+                    with engine.lock:
+                        engine.load()
+                    result = engine.status()
                 elif self.path == "/index":
                     result = engine.start(body)
                 elif self.path == "/cancel":
                     engine.cancel.set()
                     result = {"ok": True}
                 elif self.path == "/search":
+                    if is_agent:
+                        scope_file = engine.state / "agent-scope.json"
+                        scope = json.loads(scope_file.read_text("utf-8")) if scope_file.is_file() else {}
+                        if not scope.get("roots"):
+                            raise ValueError("Choose an asset scope in the Unity Editor first")
+                        body["roots"] = scope["roots"]
+                        body["excluded"] = scope.get("excluded", [])
                     result = engine.search(body)
                 elif self.path == "/clear":
                     result = engine.clear()
@@ -392,6 +538,7 @@ def main():
     parser.add_argument("--session-id", default="")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--dimensions", type=int, choices=[256, 512, 768], default=768)
+    parser.add_argument("--batch-profile", choices=["balanced", "single"], default="balanced")
     args = parser.parse_args()
     if args.download:
         download_model(args.model_dir)
@@ -414,13 +561,20 @@ def main():
     from PIL import Image
     import soundfile
     from librosa import resample
-    server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine, token))
+    agent_token = os.environ.get("UNITY_EMBEDDING_AGENT_TOKEN", "")
+    server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine, token, agent_token))
     server.daemon_threads = True
     server.timeout = 1
     ready = engine.state / "ready.json"
     pending_ready = ready.with_suffix(".tmp")
     pending_ready.write_text(json.dumps({"port": server.server_port, "pid": os.getpid(), "session": args.session_id}), "utf-8")
     pending_ready.replace(ready)
+    agent_file = engine.state / "agent-connection.json"
+    if agent_token:
+        agent_file.write_text(json.dumps({"protocol": 1, "host": "127.0.0.1", "port": server.server_port,
+            "token": agent_token, "pid": os.getpid()}), "utf-8")
+        if os.name != "nt":
+            agent_file.chmod(0o600)
     # Lifetime belongs to the Editor. A reload/exit closes redirected stdin.
     def parent_watch():
         try:
@@ -434,6 +588,7 @@ def main():
     finally:
         server.server_close()
         ready.unlink(missing_ok=True)
+        agent_file.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,408 @@
+{
+  "entries": [
+    {
+      "key": "title",
+      "value": "내 프로젝트에서 의미로 찾기"
+    },
+    {
+      "key": "subtitle",
+      "value": "텍스트 · 이미지 · 오디오를 내 컴퓨터에서 검색합니다."
+    },
+    {
+      "key": "setup.title",
+      "value": "1. 처음 한 번, 검색 환경 준비"
+    },
+    {
+      "key": "setup.help",
+      "value": "이미 모델이 있다면 폴더만 선택하세요. Python 환경이 없다면 아래 준비 버튼으로 설치할 수 있습니다."
+    },
+    {
+      "key": "model.path",
+      "value": "설치된 모델 폴더"
+    },
+    {
+      "key": "model.choose",
+      "value": "모델 폴더 선택"
+    },
+    {
+      "key": "setup.check",
+      "value": "모델 불러오기 · 연결 확인"
+    },
+    {
+      "key": "setup.install",
+      "value": "권장 설정으로 Python 환경 준비"
+    },
+    {
+      "key": "advanced.title",
+      "value": "고급 설정 · Python / 장치 / 벡터 크기"
+    },
+    {
+      "key": "python.path",
+      "value": "Python 실행 파일"
+    },
+    {
+      "key": "python.choose",
+      "value": "Python 실행 파일 선택"
+    },
+    {
+      "key": "device",
+      "value": "추론 장치"
+    },
+    {
+      "key": "device.auto",
+      "value": "자동 선택 (권장)"
+    },
+    {
+      "key": "dimensions",
+      "value": "벡터 크기"
+    },
+    {
+      "key": "advanced.help",
+      "value": "환경 준비는 프로젝트의 Library 폴더 안에만 설치합니다. 자동 설정은 NVIDIA GPU가 있으면 CUDA를 준비합니다. CPU도 사용 가능하지만 느릴 수 있습니다."
+    },
+    {
+      "key": "download.help",
+      "value": "모델 가중치를 찾지 못했습니다. 저장할 폴더를 고른 뒤 다운로드하세요. 가중치와 토크나이저·설정만 받습니다."
+    },
+    {
+      "key": "download.path",
+      "value": "다운로드 저장 폴더"
+    },
+    {
+      "key": "download.choose",
+      "value": "저장 폴더 선택"
+    },
+    {
+      "key": "download.action",
+      "value": "Hugging Face에서 모델 다운로드"
+    },
+    {
+      "key": "download.required",
+      "value": "다운로드 저장 폴더를 먼저 선택하세요."
+    },
+    {
+      "key": "scope.title",
+      "value": "2. 검색할 자료 선택"
+    },
+    {
+      "key": "scope.help",
+      "value": "필요한 폴더나 에셋만 추가하세요. 먼저 자료 수를 확인한 뒤 색인하면 됩니다. 원본 파일은 수정하지 않습니다."
+    },
+    {
+      "key": "scope.folder",
+      "value": "폴더 추가…"
+    },
+    {
+      "key": "scope.selection",
+      "value": "Project 창 선택 항목 추가"
+    },
+    {
+      "key": "scope.exclude",
+      "value": "Project 창 선택 항목 제외"
+    },
+    {
+      "key": "scope.advanced",
+      "value": "제외 항목 · 처리 수 제한"
+    },
+    {
+      "key": "scope.limit",
+      "value": "최대 에셋 수"
+    },
+    {
+      "key": "scope.preview",
+      "value": "자료 수 확인"
+    },
+    {
+      "key": "scope.index",
+      "value": "선택한 자료 색인 · 갱신"
+    },
+    {
+      "key": "scope.notScanned",
+      "value": "자동으로 전체 프로젝트를 색인하지 않습니다."
+    },
+    {
+      "key": "scope.count",
+      "value": "총 {0}개 · 텍스트 {1} · 이미지 {2} · 오디오 {3}"
+    },
+    {
+      "key": "scope.insideAssets",
+      "value": "이 프로젝트의 Assets 안에 있는 폴더를 선택하세요."
+    },
+    {
+      "key": "scope.empty",
+      "value": "선택한 범위에 지원하는 자료가 없습니다."
+    },
+    {
+      "key": "sample.import",
+      "value": "샘플로 먼저 체험"
+    },
+    {
+      "key": "sample.missing",
+      "value": "샘플을 찾지 못했습니다. Package Manager에서 샘플을 확인하세요."
+    },
+    {
+      "key": "sample.failed",
+      "value": "샘플을 가져오지 못했습니다. 자세한 오류를 확인하세요."
+    },
+    {
+      "key": "sample.ready",
+      "value": "샘플을 추가했습니다. 자료 수 확인 → 색인을 눌러보세요."
+    },
+    {
+      "key": "type.all",
+      "value": "전체 종류"
+    },
+    {
+      "key": "type.text",
+      "value": "텍스트 / 코드"
+    },
+    {
+      "key": "type.image",
+      "value": "이미지"
+    },
+    {
+      "key": "type.audio",
+      "value": "오디오"
+    },
+    {
+      "key": "remove",
+      "value": "빼기"
+    },
+    {
+      "key": "cancel",
+      "value": "현재 작업 취소"
+    },
+    {
+      "key": "progress",
+      "value": "색인 중 {0} / {1}"
+    },
+    {
+      "key": "index.summary",
+      "value": "저장된 자료 {0}개 · 갱신 {1} · 변경 없음 {2} · 실패 {3} · {4:F1}초"
+    },
+    {
+      "key": "search.title",
+      "value": "원하는 자료 찾기"
+    },
+    {
+      "key": "query",
+      "value": "찾고 싶은 내용"
+    },
+    {
+      "key": "query.hint",
+      "value": "예: 붉은 사각형, 금속 검 설명, 전자음. Enter로도 검색할 수 있습니다."
+    },
+    {
+      "key": "result.type",
+      "value": "찾을 자료 종류"
+    },
+    {
+      "key": "search.action",
+      "value": "검색"
+    },
+    {
+      "key": "code.prompt",
+      "value": "코드 검색에 맞추기"
+    },
+    {
+      "key": "results.empty",
+      "value": "결과가 없습니다. 검색어·필터·색인 범위를 확인하세요."
+    },
+    {
+      "key": "results.count",
+      "value": "결과 {0}개 · {1:F0}ms (필요한 경우 초기 로딩 포함)"
+    },
+    {
+      "key": "result.score",
+      "value": "{0} · 유사도 {1:F3}"
+    },
+    {
+      "key": "result.offset",
+      "value": " · {0:F1}초 구간"
+    },
+    {
+      "key": "result.select",
+      "value": "선택"
+    },
+    {
+      "key": "result.open",
+      "value": "열기"
+    },
+    {
+      "key": "diagnostics.title",
+      "value": "문제 해결 · 고급 관리"
+    },
+    {
+      "key": "diagnostics.help",
+      "value": "연결 설정을 바꾸려면 백엔드를 먼저 중지하세요. 색인을 비워도 원본 에셋은 보존됩니다. 아래 로그는 기술 진단용입니다."
+    },
+    {
+      "key": "backend.stop",
+      "value": "백엔드 중지"
+    },
+    {
+      "key": "index.clear",
+      "value": "생성된 색인 비우기"
+    },
+    {
+      "key": "notice.start",
+      "value": "모델 환경과 검색할 자료를 준비하면 시작할 수 있습니다."
+    },
+    {
+      "key": "notice.installing",
+      "value": "Python 환경을 준비하고 있습니다. 첫 설치에는 수 분이 걸릴 수 있습니다."
+    },
+    {
+      "key": "notice.installed",
+      "value": "Python 환경 준비 완료. 모델 폴더를 선택하고 연결을 확인하세요."
+    },
+    {
+      "key": "notice.connecting",
+      "value": "모델을 불러오는 중입니다. 첫 실행은 잠시 걸릴 수 있습니다."
+    },
+    {
+      "key": "notice.connected",
+      "value": "연결 완료 · {0}. 검색할 자료를 선택하세요."
+    },
+    {
+      "key": "notice.downloading",
+      "value": "공식 모델을 다운로드하고 있습니다. 자세한 진행은 문제 해결 로그에서 확인할 수 있습니다."
+    },
+    {
+      "key": "notice.downloaded",
+      "value": "모델 다운로드 완료. 모델 불러오기 버튼으로 확인하세요."
+    },
+    {
+      "key": "notice.preparing",
+      "value": "선택한 자료를 확인하고 준비하는 중입니다."
+    },
+    {
+      "key": "notice.preview",
+      "value": "{0}개의 자료를 확인했습니다. 색인 버튼을 눌러 검색을 준비하세요."
+    },
+    {
+      "key": "notice.indexing",
+      "value": "색인 중입니다. 변경 없는 자료는 자동으로 건너뜁니다."
+    },
+    {
+      "key": "notice.indexed",
+      "value": "색인 완료 · {0}개 갱신, {1}개 변경 없음. 이제 검색할 수 있습니다."
+    },
+    {
+      "key": "notice.indexErrors",
+      "value": "{0}개 자료 처리에 실패했습니다. 문제 해결 로그를 확인하세요."
+    },
+    {
+      "key": "notice.cancelRequested",
+      "value": "취소를 요청했습니다. 현재 추론이 끝난 뒤 멈춥니다."
+    },
+    {
+      "key": "notice.cancelled",
+      "value": "작업을 취소했습니다. 원본 자료는 보존됩니다."
+    },
+    {
+      "key": "notice.searching",
+      "value": "관련 자료를 찾고 있습니다."
+    },
+    {
+      "key": "notice.searched",
+      "value": "{0}개의 결과를 찾았습니다. 선택 버튼으로 원본을 확인하세요."
+    },
+    {
+      "key": "notice.failed",
+      "value": "작업을 완료하지 못했습니다. 아래 문제 해결에서 원인을 확인하세요."
+    },
+    {
+      "key": "notice.stopped",
+      "value": "백엔드를 중지했습니다. 모델과 장치 설정을 변경할 수 있습니다."
+    },
+    {
+      "key": "notice.cleared",
+      "value": "생성된 색인을 비웠습니다. 원본 에셋은 그대로입니다."
+    },
+    {
+      "key": "tab.search",
+      "value": "검색"
+    },
+    {
+      "key": "tab.settings",
+      "value": "설정 · 색인"
+    },
+    {
+      "key": "scope.active",
+      "value": "선택 범위 {0}개 · 저장된 자료 {1}개"
+    },
+    {
+      "key": "filters.title",
+      "value": "필터 · 정렬"
+    },
+    {
+      "key": "filters.hide",
+      "value": "낮은 유사도 숨기기"
+    },
+    {
+      "key": "filters.minimum",
+      "value": "최소 유사도"
+    },
+    {
+      "key": "filters.sort",
+      "value": "정렬"
+    },
+    {
+      "key": "filters.limit",
+      "value": "최대 결과 수"
+    },
+    {
+      "key": "filters.path",
+      "value": "경로에 포함"
+    },
+    {
+      "key": "filters.extensions",
+      "value": "확장자"
+    },
+    {
+      "key": "filters.extensionHelp",
+      "value": "쉼표로 구분합니다. 예: png,jpg 또는 cs,shader"
+    },
+    {
+      "key": "filters.scoreHelp",
+      "value": "-1~1의 코사인 유사도입니다. 확률이 아니며 자료 종류별로 적절한 값이 다릅니다."
+    },
+    {
+      "key": "filters.reset",
+      "value": "필터 초기화"
+    },
+    {
+      "key": "filters.active",
+      "value": "추가 필터 적용 중 · 변경 후 검색을 누르세요."
+    },
+    {
+      "key": "sort.similarity",
+      "value": "유사도 높은 순"
+    },
+    {
+      "key": "sort.name",
+      "value": "이름 순"
+    },
+    {
+      "key": "sort.path",
+      "value": "경로 순"
+    },
+    {
+      "key": "results.filteredCount",
+      "value": "표시 {0}개 / 조건에 맞는 자료 {1}개 · {2:F0}ms"
+    },
+    {
+      "key": "result.copyPath",
+      "value": "경로 복사"
+    },
+    {
+      "key": "result.copyGuid",
+      "value": "GUID 복사"
+    },
+    {
+      "key": "result.drag",
+      "value": "미리보기 아이콘을 드래그해 씬·Inspector로 가져오세요."
+    }
+  ]
+}

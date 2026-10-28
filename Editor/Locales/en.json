@@ -1,0 +1,408 @@
+{
+  "entries": [
+    {
+      "key": "title",
+      "value": "Find assets by meaning"
+    },
+    {
+      "key": "subtitle",
+      "value": "Search text, images and audio on your computer."
+    },
+    {
+      "key": "setup.title",
+      "value": "1. Set up once"
+    },
+    {
+      "key": "setup.help",
+      "value": "Choose an existing model folder. If needed, create the isolated Python environment below."
+    },
+    {
+      "key": "model.path",
+      "value": "Installed model folder"
+    },
+    {
+      "key": "model.choose",
+      "value": "Choose model folder"
+    },
+    {
+      "key": "setup.check",
+      "value": "Load model and check connection"
+    },
+    {
+      "key": "setup.install",
+      "value": "Prepare the recommended Python environment"
+    },
+    {
+      "key": "advanced.title",
+      "value": "Advanced · Python / device / vector size"
+    },
+    {
+      "key": "python.path",
+      "value": "Python executable"
+    },
+    {
+      "key": "python.choose",
+      "value": "Choose Python executable"
+    },
+    {
+      "key": "device",
+      "value": "Inference device"
+    },
+    {
+      "key": "device.auto",
+      "value": "Automatic (recommended)"
+    },
+    {
+      "key": "dimensions",
+      "value": "Vector dimensions"
+    },
+    {
+      "key": "advanced.help",
+      "value": "Setup installs only inside this project's Library folder. Automatic setup prepares CUDA on NVIDIA systems. CPU is supported but can be slower."
+    },
+    {
+      "key": "download.help",
+      "value": "Model weights were not found. Choose a destination and download the weights, tokenizer and configuration files."
+    },
+    {
+      "key": "download.path",
+      "value": "Download destination"
+    },
+    {
+      "key": "download.choose",
+      "value": "Choose destination"
+    },
+    {
+      "key": "download.action",
+      "value": "Download model from Hugging Face"
+    },
+    {
+      "key": "download.required",
+      "value": "Choose a download destination first."
+    },
+    {
+      "key": "scope.title",
+      "value": "2. Choose what to search"
+    },
+    {
+      "key": "scope.help",
+      "value": "Add only the folders or assets you need. Preview the selection, then index it. Source files are preserved."
+    },
+    {
+      "key": "scope.folder",
+      "value": "Add folder…"
+    },
+    {
+      "key": "scope.selection",
+      "value": "Add Project selection"
+    },
+    {
+      "key": "scope.exclude",
+      "value": "Exclude Project selection"
+    },
+    {
+      "key": "scope.advanced",
+      "value": "Exclusions and indexing limit"
+    },
+    {
+      "key": "scope.limit",
+      "value": "Maximum assets"
+    },
+    {
+      "key": "scope.preview",
+      "value": "Preview selection"
+    },
+    {
+      "key": "scope.index",
+      "value": "Index or update selection"
+    },
+    {
+      "key": "scope.notScanned",
+      "value": "The entire project is never indexed automatically."
+    },
+    {
+      "key": "scope.count",
+      "value": "{0} assets · text {1} · images {2} · audio {3}"
+    },
+    {
+      "key": "scope.insideAssets",
+      "value": "Choose a folder inside this project's Assets directory."
+    },
+    {
+      "key": "scope.empty",
+      "value": "No supported assets were found in this selection."
+    },
+    {
+      "key": "sample.import",
+      "value": "Try the sample assets"
+    },
+    {
+      "key": "sample.missing",
+      "value": "No sample was found. Check Samples in Package Manager."
+    },
+    {
+      "key": "sample.failed",
+      "value": "The sample could not be imported. Check the diagnostics."
+    },
+    {
+      "key": "sample.ready",
+      "value": "Sample added. Preview the selection, then index it."
+    },
+    {
+      "key": "type.all",
+      "value": "All types"
+    },
+    {
+      "key": "type.text",
+      "value": "Text / code"
+    },
+    {
+      "key": "type.image",
+      "value": "Images"
+    },
+    {
+      "key": "type.audio",
+      "value": "Audio"
+    },
+    {
+      "key": "remove",
+      "value": "Remove"
+    },
+    {
+      "key": "cancel",
+      "value": "Cancel current job"
+    },
+    {
+      "key": "progress",
+      "value": "Indexing {0} / {1}"
+    },
+    {
+      "key": "index.summary",
+      "value": "{0} indexed assets · updated {1} · unchanged {2} · failed {3} · {4:F1}s"
+    },
+    {
+      "key": "search.title",
+      "value": "Find assets"
+    },
+    {
+      "key": "query",
+      "value": "What are you looking for?"
+    },
+    {
+      "key": "query.hint",
+      "value": "For example: red square, metal sword description, electronic tone. Press Enter to search."
+    },
+    {
+      "key": "result.type",
+      "value": "Asset type"
+    },
+    {
+      "key": "search.action",
+      "value": "Search"
+    },
+    {
+      "key": "code.prompt",
+      "value": "Optimize for code retrieval"
+    },
+    {
+      "key": "results.empty",
+      "value": "No results. Check the query, filters and indexed scope."
+    },
+    {
+      "key": "results.count",
+      "value": "{0} results · {1:F0}ms (includes initial loading when needed)"
+    },
+    {
+      "key": "result.score",
+      "value": "{0} · similarity {1:F3}"
+    },
+    {
+      "key": "result.offset",
+      "value": " · segment at {0:F1}s"
+    },
+    {
+      "key": "result.select",
+      "value": "Select"
+    },
+    {
+      "key": "result.open",
+      "value": "Open"
+    },
+    {
+      "key": "diagnostics.title",
+      "value": "Troubleshooting and maintenance"
+    },
+    {
+      "key": "diagnostics.help",
+      "value": "Stop the backend before changing connection settings. Clearing the index preserves source assets. The log below is for technical diagnostics."
+    },
+    {
+      "key": "backend.stop",
+      "value": "Stop backend"
+    },
+    {
+      "key": "index.clear",
+      "value": "Clear generated index"
+    },
+    {
+      "key": "notice.start",
+      "value": "Prepare the model environment and choose your assets to begin."
+    },
+    {
+      "key": "notice.installing",
+      "value": "Preparing Python. The first installation can take several minutes."
+    },
+    {
+      "key": "notice.installed",
+      "value": "Python is ready. Choose a model folder and check the connection."
+    },
+    {
+      "key": "notice.connecting",
+      "value": "Loading the model. The first run can take a moment."
+    },
+    {
+      "key": "notice.connected",
+      "value": "Connected · {0}. Choose the assets to search."
+    },
+    {
+      "key": "notice.downloading",
+      "value": "Downloading the official model. See diagnostics for detailed progress."
+    },
+    {
+      "key": "notice.downloaded",
+      "value": "Model downloaded. Use Load model to verify it."
+    },
+    {
+      "key": "notice.preparing",
+      "value": "Checking and preparing the selected assets."
+    },
+    {
+      "key": "notice.preview",
+      "value": "Found {0} assets. Index them to prepare search."
+    },
+    {
+      "key": "notice.indexing",
+      "value": "Indexing. Unchanged assets are skipped automatically."
+    },
+    {
+      "key": "notice.indexed",
+      "value": "Index complete · {0} updated, {1} unchanged. You can search now."
+    },
+    {
+      "key": "notice.indexErrors",
+      "value": "{0} assets failed. Check the diagnostics."
+    },
+    {
+      "key": "notice.cancelRequested",
+      "value": "Cancellation requested. The current inference will finish first."
+    },
+    {
+      "key": "notice.cancelled",
+      "value": "Job cancelled. Source assets are preserved."
+    },
+    {
+      "key": "notice.searching",
+      "value": "Finding related assets."
+    },
+    {
+      "key": "notice.searched",
+      "value": "Found {0} results. Select one to inspect the source asset."
+    },
+    {
+      "key": "notice.failed",
+      "value": "The operation could not be completed. Open Troubleshooting for details."
+    },
+    {
+      "key": "notice.stopped",
+      "value": "Backend stopped. You can change the model and device settings."
+    },
+    {
+      "key": "notice.cleared",
+      "value": "Generated index cleared. Source assets are preserved."
+    },
+    {
+      "key": "tab.search",
+      "value": "Search"
+    },
+    {
+      "key": "tab.settings",
+      "value": "Setup & index"
+    },
+    {
+      "key": "scope.active",
+      "value": "{0} selected scopes · {1} stored assets"
+    },
+    {
+      "key": "filters.title",
+      "value": "Filters & sorting"
+    },
+    {
+      "key": "filters.hide",
+      "value": "Hide low similarity"
+    },
+    {
+      "key": "filters.minimum",
+      "value": "Minimum cosine"
+    },
+    {
+      "key": "filters.sort",
+      "value": "Sort"
+    },
+    {
+      "key": "filters.limit",
+      "value": "Result limit"
+    },
+    {
+      "key": "filters.path",
+      "value": "Path contains"
+    },
+    {
+      "key": "filters.extensions",
+      "value": "Extensions"
+    },
+    {
+      "key": "filters.extensionHelp",
+      "value": "Comma separated, e.g. png,jpg or cs,shader"
+    },
+    {
+      "key": "filters.scoreHelp",
+      "value": "Cosine similarity from -1 to 1, not a probability. Useful thresholds vary by modality."
+    },
+    {
+      "key": "filters.reset",
+      "value": "Reset filters"
+    },
+    {
+      "key": "filters.active",
+      "value": "Additional filters active · Search to apply changes."
+    },
+    {
+      "key": "sort.similarity",
+      "value": "Highest similarity"
+    },
+    {
+      "key": "sort.name",
+      "value": "Name"
+    },
+    {
+      "key": "sort.path",
+      "value": "Path"
+    },
+    {
+      "key": "results.filteredCount",
+      "value": "Showing {0} of {1} matching assets · {2:F0}ms"
+    },
+    {
+      "key": "result.copyPath",
+      "value": "Copy path"
+    },
+    {
+      "key": "result.copyGuid",
+      "value": "Copy GUID"
+    },
+    {
+      "key": "result.drag",
+      "value": "Drag the preview icon into the Scene or Inspector."
+    }
+  ]
+}

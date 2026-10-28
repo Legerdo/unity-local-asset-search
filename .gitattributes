@@ -1,8 +1,13 @@
-* text=auto
+* text=auto eol=lf
 *.cs text eol=lf
 *.py text eol=lf
 *.json text eol=lf
 *.uxml text eol=lf
 *.uss text eol=lf
 *.md text eol=lf
+*.meta text eol=lf
+.gitignore text eol=lf
 *.gif binary
+*.png binary
+*.wav binary
+*.tgz binary

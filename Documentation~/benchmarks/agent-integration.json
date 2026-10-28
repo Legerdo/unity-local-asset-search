@@ -1,0 +1,22 @@
+{
+  "transport": "MCP stdio",
+  "checks": [
+    {
+      "kind": "text",
+      "top_path": "Assets/LocalAssetSearchBenchmark/Sword.txt",
+      "score": 0.8072757720947266
+    },
+    {
+      "kind": "image",
+      "top_path": "Assets/LocalAssetSearchBenchmark/RedSquare.png",
+      "score": 0.7701973915100098
+    },
+    {
+      "kind": "audio",
+      "top_path": "Assets/LocalAssetSearchBenchmark/HighTone.wav",
+      "score": 0.6643384695053101
+    }
+  ],
+  "advanced_filters": true,
+  "passed": true
+}

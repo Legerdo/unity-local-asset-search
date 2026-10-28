@@ -1,0 +1,113 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:Style src="AssetSearchWindow.uss" />
+  <ui:VisualElement class="asset-search">
+    <ui:VisualElement class="heading">
+      <ui:VisualElement class="heading-copy">
+        <ui:Label name="title" class="title" />
+        <ui:Label name="subtitle" class="muted wrap" />
+      </ui:VisualElement>
+      <ui:DropdownField name="language" class="language" />
+    </ui:VisualElement>
+    <ui:VisualElement class="tabs">
+      <ui:Button name="searchTab" />
+      <ui:Button name="settingsTab" />
+    </ui:VisualElement>
+    <ui:VisualElement name="searchPane" class="content">
+      <ui:VisualElement class="card search-card">
+        <ui:Label name="activeScope" class="muted wrap" />
+        <ui:Label name="searchTitle" class="section-title" />
+        <ui:TextField name="queryField" />
+        <ui:Label name="queryHint" class="muted wrap" />
+        <ui:VisualElement class="actions">
+          <ui:DropdownField name="resultType" class="grow" />
+          <ui:Button name="searchButton" class="primary" />
+        </ui:VisualElement>
+        <ui:Toggle name="codePrompt" />
+        <ui:Foldout name="searchFilters">
+          <ui:VisualElement class="actions">
+            <ui:Toggle name="hideLowScores" />
+            <ui:FloatField name="minimumScore" class="grow" />
+          </ui:VisualElement>
+          <ui:VisualElement class="actions">
+            <ui:DropdownField name="resultSort" class="grow" />
+            <ui:DropdownField name="resultLimit" class="grow" />
+          </ui:VisualElement>
+          <ui:TextField name="pathContains" />
+          <ui:TextField name="extensions" />
+          <ui:Button name="resetFilters" />
+        </ui:Foldout>
+        <ui:Label name="filterSummary" class="muted wrap" />
+        <ui:Label name="resultSummary" class="muted wrap" />
+        <ui:ScrollView name="resultsScroll" mode="Vertical" horizontal-scroller-visibility="Hidden" class="result-scroll">
+          <ui:VisualElement name="results" />
+          <ui:Label name="emptyResults" class="empty-state wrap" />
+        </ui:ScrollView>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:ScrollView name="settingsPane" class="content">
+      <ui:Foldout name="setupSection" class="card">
+        <ui:Label name="setupHelp" class="muted wrap" />
+        <ui:VisualElement name="setupControls">
+          <ui:TextField name="modelPath" />
+          <ui:VisualElement class="actions">
+            <ui:Button name="chooseModel" />
+            <ui:Button name="checkEnvironment" />
+          </ui:VisualElement>
+          <ui:VisualElement name="downloadBox" class="download-box">
+            <ui:Label name="downloadHelp" class="wrap" />
+            <ui:TextField name="downloadPath" />
+            <ui:VisualElement class="actions">
+              <ui:Button name="chooseDownload" />
+              <ui:Button name="downloadModel" />
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:Button name="setupEnvironment" class="primary" />
+          <ui:Foldout name="advancedSetup">
+            <ui:TextField name="pythonPath" />
+            <ui:Button name="choosePython" />
+            <ui:DropdownField name="device" />
+            <ui:DropdownField name="dimensions" />
+            <ui:Label name="advancedHelp" class="muted wrap" />
+          </ui:Foldout>
+        </ui:VisualElement>
+      </ui:Foldout>
+      <ui:VisualElement class="card">
+        <ui:Label name="scopeTitle" class="section-title" />
+        <ui:Label name="scopeHelp" class="muted wrap" />
+        <ui:VisualElement name="scopeControls">
+          <ui:VisualElement class="actions">
+            <ui:Button name="addFolder" />
+            <ui:Button name="addSelection" />
+            <ui:Button name="importSample" />
+          </ui:VisualElement>
+          <ui:VisualElement name="includedList" />
+          <ui:VisualElement class="actions">
+            <ui:Toggle name="textType" />
+            <ui:Toggle name="imageType" />
+            <ui:Toggle name="audioType" />
+          </ui:VisualElement>
+          <ui:Foldout name="advancedScope">
+            <ui:IntegerField name="assetLimit" />
+            <ui:Button name="excludeSelection" />
+            <ui:VisualElement name="excludedList" />
+          </ui:Foldout>
+          <ui:VisualElement class="actions">
+            <ui:Button name="previewScope" />
+            <ui:Button name="indexScope" class="primary" />
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label name="scopeSummary" class="muted wrap" />
+        <ui:ProgressBar name="indexProgress" />
+        <ui:Label name="indexSummary" class="muted wrap" />
+        <ui:Button name="cancel" />
+      </ui:VisualElement>
+      <ui:Foldout name="diagnostics" class="card">
+        <ui:Label name="diagnosticsHelp" class="muted wrap" />
+        <ui:Button name="stopBackend" />
+        <ui:Button name="clearIndex" />
+        <ui:TextField name="log" multiline="true" is-read-only="true" />
+      </ui:Foldout>
+    </ui:ScrollView>
+    <ui:Label name="notice" class="notice wrap" />
+  </ui:VisualElement>
+</ui:UXML>

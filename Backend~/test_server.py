@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import tempfile
 import threading
+import subprocess
+import sys
 import unittest
 import server
 
@@ -86,6 +88,37 @@ class BoundaryTests(unittest.TestCase):
         parts = list(server.chunks(text))
         self.assertEqual(parts[-1][0] + len(parts[-1][1]), len(text))
         self.assertTrue(all(len(value) <= 1800 for _, value in parts))
+
+    def test_agent_read_only_scope_and_utf8_cli(self):
+        token, agent = "a" * 64, "b" * 64
+        received = []
+        self.engine.search = lambda body: received.append(body) or {"results": [{"path": "Assets/선택/검.txt"}]}
+        http = server.ThreadingHTTPServer(("127.0.0.1", 0), server.make_handler(self.engine, token, agent))
+        thread = threading.Thread(target=http.serve_forever, daemon=True); thread.start()
+        def request(endpoint, body):
+            connection = http_client_class("127.0.0.1", http.server_port)
+            connection.request("POST", endpoint, json.dumps(body), {"Authorization": "Bearer " + agent})
+            response = connection.getresponse(); code = response.status; response.read(); connection.close()
+            return code
+        http_client_class = __import__("http.client", fromlist=["HTTPConnection"]).HTTPConnection
+        try:
+            self.assertEqual(request("/status", {}), 200)
+            for endpoint in ("/index", "/clear", "/cancel", "/warmup"):
+                self.assertEqual(request(endpoint, {}), 403)
+            self.assertEqual(request("/search", {"query": "a sword"}), 400)
+            scope = {"roots": ["Assets/선택"], "excluded": ["Assets/선택/제외"]}
+            (self.engine.state / "agent-scope.json").write_text(json.dumps(scope), "utf-8")
+            self.assertEqual(request("/search", {"query": "검", "roots": ["Assets"], "excluded": []}), 200)
+            self.assertEqual(received[-1]["roots"], scope["roots"])
+            self.assertEqual(received[-1]["excluded"], scope["excluded"])
+            (self.engine.state / "agent-connection.json").write_text(json.dumps({"protocol": 1, "host": "127.0.0.1", "port": http.server_port, "token": agent}), "utf-8")
+            run = subprocess.run([sys.executable, str(Path(__file__).parents[1] / "Agent~/search.py"),
+                "--project", str(self.root), "--query", "한국어 검"], capture_output=True, encoding="utf-8")
+            self.assertEqual(run.returncode, 0, run.stderr)
+            self.assertIn("선택/검", run.stdout)
+            self.assertEqual(received[-1]["query"], "한국어 검")
+        finally:
+            http.shutdown(); http.server_close(); thread.join()
 
 
 if __name__ == "__main__":
