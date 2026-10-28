@@ -1,39 +1,93 @@
 # Local Asset Search for Unity
 
-Version 0.2.2 embeds the asset name and two nearby folder names together with image/audio content. Rebuild the generated index after upgrading; the preprocessing fingerprint rejects older vectors. Scores remain cosine similarities. Metadata can help asset retrieval but misleading names can also hurt it. See the [paired real-resource quality audit](Documentation~/QUALITY.md).
+[한국어](README.md) · [Benchmarks](Documentation~/BENCHMARKS.md) · [Troubleshooting](Documentation~/TROUBLESHOOTING.md) · [Todo](Documentation~/TODO.md)
 
-Memory and process lifetime fixes are included in **0.2.1**. Version 0.2.0 retained GPU weights across model reloads and could leave a backend child running after stop. See the [measured audit and reproduction commands](Documentation~/MEMORY.md) for evidence and limits.
+Search text, images and audio in the Unity Editor using natural-language queries. Index only the folders you choose, then select the original assets, copy their paths or drag their preview icons into Unity. The UI defaults to Korean and includes English.
 
-[한국어](README.md)
+EmbeddingGemma 2 runs in a separate local Python process. The package has no Sentis/Inference Engine or render-pipeline dependency and does not include model inference in player builds.
 
-An Editor-only UPM package for semantic search across local text, images and audio using EmbeddingGemma 2. Inference runs in an isolated Python process, with no Sentis, runtime component or render-pipeline dependency. Korean is the default UI language; select English in the window header.
+![Actual Unity Editor walkthrough](Documentation~/media/quick-start.gif)
 
-## Quick start
+Captured from version 0.2.0. The GIF combines real Editor steps; its playback duration is not a latency measurement.
 
-1. Install `package.json` through Package Manager's package-from-disk option, or install the release `.tgz` as a tarball.
-2. Open **Tools > Local Asset Search > Setup & index**. Use Python 3.11–3.13 and create the recommended isolated environment. NVIDIA GPUs automatically select CUDA. Global Python packages are untouched.
-3. Select a native Hugging Face EmbeddingGemma 2 checkpoint folder, or choose an empty download folder. Prepare the Python environment before downloading. Only essential files from the pinned revision are downloaded; existing weights are not overwritten.
-4. Connect the model, import the Quick Start sample or add specific Assets folders, preview the count, then index. The initial scope is empty and indexing is always explicit.
-5. Search from the Search tab. Controls stay fixed while results scroll. Select/open results using Unity's standard asset tools.
+## Features
 
-The collapsed **Filters & sorting** panel provides an optional minimum cosine, similarity/name/path ordering, result limit, path substring and comma-separated extensions. Apply changes by searching again. Thresholds are not probabilities and differ by modality. Copy paths/GUIDs or drag a result's preview icon into the Scene/Inspector. MCP and CLI expose the same search filters.
+| Task | Controls |
+|---|---|
+| Find code, documents and images | Queries such as `player movement code` or `a red square` |
+| Find audio candidates | Describe a sound, then listen in the Inspector; sound-event recognition remains limited |
+| Narrow the scope | Include/exclude folders, asset kind, path substring and extensions |
+| Filter results | Optional minimum cosine, similarity/name/path ordering, 10/20/50/100 results |
+| Use an asset | Select/open, copy path/GUID, drag its preview icon |
+| Connect agents | Read-only MCP/CLI and public C# Editor APIs |
 
-![Actual Editor walkthrough](Documentation~/media/quick-start.gif)
+Version 0.2.2 embeds image/audio content together with the filename and two nearby folder names. Incorrect metadata can hurt results. [Quality checks](Documentation~/QUALITY.md) separate filename-assisted retrieval from content understanding.
 
-The GIF combines real step captures and does not represent elapsed processing time. [Measured results](Documentation~/BENCHMARKS.md) include the raw JSON, hardware, synthetic dataset and reproduction instructions. These are integration/performance checks, not a general retrieval-quality benchmark.
+## Install
 
-## Direct agent tools
+Prepare Python 3.11–3.13 on Windows. CPU and NVIDIA CUDA inference are supported. Unity 2021.3 is the declared minimum, but has not been run in validation. See the [tested version matrix](Documentation~/COMPATIBILITY.md).
 
-Register `Agent~/mcp_server.py --project <project>` as an MCP stdio server for `unity_asset_search` and `unity_asset_status`. The standard-library CLI `Agent~/search.py` returns UTF-8 JSON as well. No Computer Use is needed. [Setup, examples and public Editor API](Agent~/README.md), [optional skill](Agent~/skills/unity-asset-search/SKILL.md).
+In Package Manager, choose **Install/Add package from git URL**:
 
-Agent credentials permit only search/status. Include/exclude scope is enforced by the backend, and credentials remain in generated Library files. This is a same-user local integration, not an OS sandbox. Model/environment/index management is performed through the Editor or its public C# API on the Unity main thread.
+```text
+https://github.com/Legerdo/unity-local-asset-search.git#v0.2.2
+```
 
-## Implementation and limits
+Alternatively, install the `.tgz` from the [release](https://github.com/Legerdo/unity-local-asset-search/releases/tag/v0.2.2) as a tarball, or select a local checkout's `package.json` with package-from-disk.
 
-Content-hash incremental indexing, modality batching, preview caching, a 64-query LRU, SQL filtering before vector reads, bounded exact cosine ranking, FP32 re-normalization of BF16 vectors, cancellation and atomic per-asset commits are implemented. No cloud asset uploads or remote model code are used.
+### First search
 
-Text is UTF-8, up to 2 MB, chunked at 1,800 characters with 200 overlap. Images are Unity Texture2D main assets exported as maximum-1,024px RGB previews without importer changes. Supported audio codecs are those readable by libsndfile, up to 300 seconds/256 MB, resampled to mono 16 kHz and chunked at 20 seconds with 2 overlap. Sprites are indexed at texture level. Unsupported: video, AnimationClip analysis, automatic prefab/3D rendering, ANN, automatic change watching and MPS. Real OOM recovery and non-Windows execution remain unverified.
+1. Open `Tools > Local Asset Search > Setup & index` and switch the header language to English.
+2. Prepare the recommended isolated Python environment. It lives in the project's Library; global Python packages are untouched. NVIDIA GPUs select the CUDA environment.
+3. Select an existing native Hugging Face EmbeddingGemma 2 folder. If absent, choose an empty download destination and download after environment setup finishes. Only required files from the pinned revision are fetched; no ONNX/GGUF conversion is needed.
+4. Connect the model, import the Quick Start sample or add specific Assets folders.
+5. Preview the count, then index. The whole project is never indexed automatically. Unchanged files are skipped on later updates.
+6. Search for `a red square`, choose images and select/open a result.
 
-The minimum declared Unity version is 2021.3. See the [verified version matrix](Documentation~/COMPATIBILITY.md); compatibility with all future versions is not guaranteed. Settings are project-local UserSettings; generated caches, environment and agent credentials live under Library. Model files remain external and are not bundled.
+Search controls stay fixed while results scroll. Run the search again after changing filters. Cosine scores range from -1 to 1 and are not probabilities; choose thresholds for the asset kind and task.
 
-Reference: [ayutaz/unity-embeddinggemma-2](https://github.com/ayutaz/unity-embeddinggemma-2). This package is a separate implementation and does not inherit that repository's test evidence. Model: [google/embeddinggemma-2](https://huggingface.co/google/embeddinggemma-2), pinned revision `914f7f89142e33e77833254d9c9b90c3cef7303b`; original model terms apply.
+When upgrading to 0.2.2, stop/reconnect the backend, clear the generated index in Setup and reindex. Its media preprocessing fingerprint rejects older vectors. Clearing the index does not remove original assets or model files.
+
+## Measurements
+
+Measured on 2026-10-28 with Windows 11, RTX 5080 16 GB, 32 GB system RAM and 768-dimensional CUDA BF16 embeddings. The model was warm. Indexing excludes Unity import, preview generation and startup; search includes HTTP round trips but excludes UI rendering.
+
+| Dataset and entry point | Index | New query p50 / p95 |
+|---|---:|---:|
+| 134 authored fixtures through Unity, v0.2.0 | 2.616 s | 42.37 / 49.93 ms |
+| 192 real resources through product HTTP/Engine, v0.2.2 | 14.56 s | 46.33 / 58.85 ms |
+
+The fixture set contains 130 short texts, two shapes and two tones. The real set contains 64 assets per modality and 426 vectors. Different datasets/versions prevent a direct speedup comparison. Real 1k/5k/10k fully embedded datasets have not been measured. See [conditions and reproduction](Documentation~/BENCHMARKS.md) and [memory checks](Documentation~/MEMORY.md).
+
+In a small held-out image set, all nine content-based queries ranked a relevant image first without metadata. Audio has no equivalent independent listening ground truth. A small CPU comparison favored CLAP Q8 in cost and automatic-reference agreement, but it is not integrated. EmbeddingGemma 2 remains the product model. These observations are not general retrieval accuracy claims.
+
+## Agent integration
+
+Register `Agent~/mcp_server.py --project <Unity project>` as an MCP stdio server after connecting and indexing in Unity:
+
+```text
+unity_asset_status({})
+unity_asset_search({"query":"a red square", "kind":"image", "top":5})
+```
+
+The standard-library CLI returns UTF-8 JSON:
+
+```powershell
+python "<package>/Agent~/search.py" --project "<project>" --query "a metal sword" --kind text --top 10
+```
+
+[Configuration, filters and C# APIs](Agent~/README.md) · [Optional agent skill](Agent~/skills/unity-asset-search/SKILL.md). Agent credentials allow status/search only; the server enforces the Editor's current scope. Indexing and configuration use the Editor or its public APIs on the Unity main thread.
+
+## Data and limits
+
+Settings live in `UserSettings/LocalAssetSearch.asset`. Generated indexes, previews, diagnostics, environment and agent connection files live under `Library/LocalAssetSearch/`. Models live in the selected directory. Keep generated data and credentials out of source control. Asset content is not uploaded; network access is used for explicit dependency setup and model downloads.
+
+The default scope limit is 1,000 assets, with a maximum of 10,000. Search filters before exact cosine ranking; there is no ANN index. Video, AnimationClip content analysis, prefab/3D rendering, automatic file watching and MPS are unsupported. Non-Windows execution, light-theme visuals, real GPU OOM recovery and long-running large projects remain unverified.
+
+[Technical contracts](Documentation~/README.md) · [Troubleshooting](Documentation~/TROUBLESHOOTING.md) · [Todo](Documentation~/TODO.md) · [Contributing and tests](CONTRIBUTING.md) · [Changelog](CHANGELOG.md).
+
+## License and references
+
+Package code and authored Quick Start samples use the [MIT license](LICENSE.md). Model weights are not bundled; [google/embeddinggemma-2](https://huggingface.co/google/embeddinggemma-2) has separate terms. Pinned revision: `914f7f89142e33e77833254d9c9b90c3cef7303b`. Installed Python dependencies retain their own licenses.
+
+[ayutaz/unity-embeddinggemma-2](https://github.com/ayutaz/unity-embeddinggemma-2) informed the approach comparison; this is a separate implementation with separate validation. Korean prose was edited using the [ai-slop-thresher](https://github.com/Burntgogi/ai-slop-thresher) guidelines.

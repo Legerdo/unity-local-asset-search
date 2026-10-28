@@ -1,0 +1,89 @@
+{
+  "measured_on": "2026-10-28",
+  "package_version": "0.2.2",
+  "model": "google/embeddinggemma-2",
+  "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+  "evidence_access": "Raw evidence retained locally; private asset paths, original media and vectors are not distributed. This aggregate cannot reproduce the identical corpus.",
+  "gpu_run": {
+    "hardware": "Windows 11, RTX 5080 16 GB, RAM 32 GB",
+    "precision": "BF16; FP32 normalized vectors",
+    "dimensions": 768,
+    "assets": 192,
+    "assets_per_kind": 64,
+    "vectors": 426,
+    "index_seconds": 14.56,
+    "http_query_p50_ms": 46.33,
+    "http_query_p95_ms": 58.85,
+    "excludes": [
+      "Unity import/preview preparation",
+      "model startup",
+      "UI rendering"
+    ]
+  },
+  "held_out_ablation": {
+    "assets": 48,
+    "assets_per_kind": 16,
+    "image_queries": 9,
+    "audio_physical_property_queries": 5,
+    "content_only": {
+      "image_top1": 9,
+      "image_top5": 9,
+      "audio_top1": 1,
+      "audio_top5": 5
+    },
+    "content_metadata": {
+      "image_top1": 9,
+      "image_top5": 9,
+      "audio_top1": 0,
+      "audio_top5": 4
+    },
+    "swapped_metadata": {
+      "image_top1": 8,
+      "image_top5": 9,
+      "audio_top1": 1,
+      "audio_top5": 4
+    },
+    "metadata_only": {
+      "image_top1": 6,
+      "image_top5": 7,
+      "audio_top1": 0,
+      "audio_top5": 2
+    }
+  },
+  "audio_comparison": {
+    "assets": 16,
+    "queries": 16,
+    "distinct_concepts": 8,
+    "reference": "EfficientAT automatic tags; not human listening ground truth",
+    "hardware": "Ryzen 7 9800X3D CPU, 4 threads per runtime",
+    "clap_q8": {
+      "top1": 5,
+      "top5": 11,
+      "mrr": 0.463,
+      "query_encode_mean_ms": 3.35,
+      "audio_pipeline_seconds": 2.0,
+      "controls_passed": 3
+    },
+    "gemma_fp32": {
+      "top1": 3,
+      "top5": 10,
+      "mrr": 0.382,
+      "query_encode_mean_ms": 61.41,
+      "audio_pipeline_seconds": 2.92,
+      "controls_passed": 2
+    },
+    "limitations": [
+      "different precision/runtime",
+      "shared AudioSet domain may favor CLAP agreement",
+      "8 paraphrase pairs, not 16 independent concepts",
+      "not Unity HTTP/UI latency"
+    ],
+    "product_decision": "Keep EmbeddingGemma 2; CLAP not integrated"
+  },
+  "local_evidence_sha256": {
+    "quality-final": "791c05e9e72a9acc8b9b7eff92633c8f1909ba6a8823da6b193e73ef229e7905",
+    "content-ablation": "693369aa1839127f65c38ba87aebad125ee7e302c03292275c9aca21f5167ffe",
+    "efficientat-retrieval": "5541fae91b261fa849a0ac2468e308f0ad10c8647ff81756e1981a7682a08856",
+    "audio-model-comparison": "ff3fd89cff3ceaf22d1a9756378f64dfd56c24d7a8d5573e3e32a33596f6f0fc"
+  }
+}

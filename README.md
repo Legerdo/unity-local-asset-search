@@ -1,66 +1,113 @@
 # Local Asset Search for Unity
 
-[English](README.en.md)
+[English](README.en.md) · [벤치마크](Documentation~/BENCHMARKS.md) · [문제 해결](Documentation~/TROUBLESHOOTING.md) · [Todo](Documentation~/TODO.md)
 
-Unity Editor에서 **텍스트·이미지·오디오를 의미로 검색**하는 UPM 패키지입니다. 한국어 UI를 기본으로 제공하며 영어로 전환할 수 있습니다. 추론은 격리된 로컬 Python 프로세스가 담당합니다. Sentis/Inference Engine, 런타임 컴포넌트, 특정 렌더 파이프라인 의존성이 없습니다.
+Unity Editor에서 텍스트·이미지·오디오를 문장으로 검색하는 UPM 패키지입니다. 필요한 폴더만 색인하고 결과에서 원본 에셋을 선택하거나 경로를 복사할 수 있습니다. 한국어 UI가 기본이며 영어로 전환할 수 있습니다.
 
-![실제 Unity 사용 화면](Documentation~/media/quick-start.gif)
+EmbeddingGemma 2는 별도 로컬 Python 프로세스에서 실행합니다. Sentis/Inference Engine이나 렌더 파이프라인에 의존하지 않으며 플레이어 빌드에 모델을 포함하지 않습니다.
 
-GIF는 실제 에디터 화면을 단계별로 캡처한 안내입니다. 재생 시간은 처리 속도 측정값이 아닙니다.
+![Unity에서 종류 필터와 유사도 하한선으로 결과 좁히기](Documentation~/media/quick-start.gif)
 
-## 처음 사용하기
+실제 Unity 화면을 단계별로 캡처한 GIF입니다. 0.2.0에서 촬영했으며 재생 시간은 처리 속도를 나타내지 않습니다.
 
-1. Unity **Window > Package Manager > + > Install package from disk**에서 이 저장소의 `package.json`을 선택합니다. 배포용 `.tgz`는 tarball 설치 메뉴를 사용합니다.
-2. **Tools > Local Asset Search > 설정 · 색인**을 엽니다. Python 3.11~3.13이 없다면 먼저 설치합니다. **권장 설정으로 Python 환경 준비**를 누르면 프로젝트 Library 안에 별도 환경을 만듭니다. 전역 Python 패키지는 변경하지 않습니다. NVIDIA GPU는 자동으로 CUDA 환경을 선택합니다.
-3. 기존 Hugging Face 원본 **EmbeddingGemma 2 모델 폴더**를 지정합니다. 없으면 빈 다운로드 대상 폴더를 지정하고 다운로드합니다. 필요 파일만 고정 리비전에서 받으며 ONNX/GGUF 변환은 필요 없습니다. 기존 체크포인트는 덮어쓰지 않습니다. 처음 다운로드하기 전에 Python 환경을 준비하세요.
-4. **모델 불러오기 · 연결 확인**을 누릅니다. **샘플로 먼저 체험** 또는 **폴더 추가**로 필요한 범위만 지정합니다. 프로젝트 전체를 자동 색인하지 않습니다.
-5. **자료 수 확인 → 선택한 자료 색인 · 갱신**을 누릅니다. 완료되면 검색 탭으로 이동합니다. 다음부터 변경되지 않은 파일은 다시 임베딩하지 않습니다.
-6. 검색어와 자료 종류를 선택합니다. 예: `a red square`, `metal sword and shield`, `an electronic tone`. 결과의 **선택**으로 Project 창에서 찾고 **열기**로 원본을 확인합니다. 오디오는 Inspector에서 재생할 수 있습니다.
+## 주요 기능
 
-검색 탭의 입력·필터는 고정되고 결과 목록만 스크롤합니다. 설치·폴더 관리·진단은 별도 설정 탭에 있습니다. 밝은 테마 스타일도 포함하지만 실제 화면 검증은 어두운 테마에서 수행했습니다.
+| 작업 | 사용 방법 |
+|---|---|
+| 코드·문서 찾기 | `player movement code`, `metal sword and shield`처럼 내용을 설명합니다. |
+| 이미지 찾기 | `a red square`, `a gray document page icon`처럼 모양과 색을 설명합니다. |
+| 오디오 후보 찾기 | 소리 설명으로 검색한 뒤 Inspector에서 들어봅니다. 효과음 내용 구분에는 한계가 있습니다. |
+| 범위 줄이기 | 포함 폴더·제외 경로, 자료 종류, 확장자, 경로 문자열을 지정합니다. |
+| 결과 정리 | 최소 유사도, 결과 수 10/20/50/100, 유사도·이름·경로 정렬을 선택합니다. |
+| 에셋 사용 | 원본 선택·열기, 경로·GUID 복사, 미리보기 아이콘 드래그를 지원합니다. |
+| 에이전트 연결 | MCP·CLI·공개 C# Editor API로 UI 조작 없이 호출합니다. |
 
-**필터 · 정렬**에서는 낮은 유사도 숨기기와 최소 코사인(-1~1), 유사도/이름/경로 정렬, 최대 10/20/50/100개, 경로 포함 문자열과 확장자(`png,jpg` 또는 `cs,shader`)를 지정합니다. 기본 정렬은 유사도 높은 순이며 하한선은 선택 기능입니다. 점수는 확률이 아니므로 오디오·이미지·텍스트에 같은 기준을 강제하지 않습니다. 조건 변경 후 검색을 다시 누르세요. 이름·경로 정렬은 조건에 맞는 전체 자료를 정렬한 다음 결과 수를 적용합니다. 결과의 경로·GUID를 복사하거나 미리보기 아이콘을 씬/Inspector로 드래그할 수 있습니다.
+0.2.2는 이미지·오디오의 내용에 파일명과 가까운 두 폴더 이름을 함께 넣어 임베딩합니다. 잘못된 이름은 결과에도 영향을 줍니다. 파일명 기반 참조 검색의 개선을 소리 인식 향상으로 해석하지 않도록 [내용 기준 검증](Documentation~/QUALITY.md)을 별도로 정리했습니다.
 
-## AI 에이전트에서 바로 호출
+## 설치
 
-MCP stdio 서버 `Agent~/mcp_server.py`를 등록하면 Computer Use 없이 다음 도구를 호출합니다.
+Windows에서 Python 3.11~3.13을 준비합니다. NVIDIA CUDA와 CPU를 지원합니다. UPM 최소 선언은 Unity 2021.3이고, 해당 버전의 실행은 미검증입니다. 실제 확인 범위는 [호환성 표](Documentation~/COMPATIBILITY.md)에 있습니다.
+
+Unity의 `Window > Package Manager > + > Install package from git URL`에 다음 주소를 넣습니다. 버전에 따라 메뉴 이름이 `Add package from git URL`일 수 있습니다.
+
+```text
+https://github.com/Legerdo/unity-local-asset-search.git#v0.2.2
+```
+
+Git 설치가 어려우면 [릴리스](https://github.com/Legerdo/unity-local-asset-search/releases/tag/v0.2.2)의 `.tgz`를 내려받아 tarball 설치 메뉴를 사용합니다. 저장소를 직접 받은 경우 package-from-disk 메뉴에서 `package.json`을 선택합니다.
+
+### 처음 검색하기
+
+1. `Tools > Local Asset Search > 설정 · 색인`을 엽니다.
+2. `권장 설정으로 Python 환경 준비`를 누릅니다. 프로젝트 Library에 격리 환경을 만들고 NVIDIA GPU가 있으면 CUDA 환경을 선택합니다. 전역 Python 패키지는 변경하지 않습니다.
+3. 기존 Hugging Face 원본 EmbeddingGemma 2 모델 폴더를 지정합니다. 모델이 없으면 빈 다운로드 대상 폴더를 지정하고 다운로드합니다. 환경 준비가 먼저 끝나야 합니다. 고정 리비전의 필수 파일만 받으며 ONNX/GGUF 변환은 필요 없습니다.
+4. `모델 불러오기 · 연결 확인`을 누릅니다. `샘플로 먼저 체험`을 선택하거나 `폴더 추가`로 Assets 범위를 지정합니다.
+5. `자료 수 확인 → 선택한 자료 색인 · 갱신`을 실행합니다. 전체 프로젝트를 자동 색인하지 않으며 이후 갱신에서는 바뀌지 않은 파일을 건너뜁니다.
+6. 검색 탭에서 `a red square`를 입력하고 이미지 종류를 선택합니다. 결과의 `선택`이나 `열기`로 원본을 확인합니다.
+
+검색 입력과 필터는 고정되고 결과 목록만 스크롤합니다. 필터를 바꾼 뒤에는 검색을 다시 누르세요. 유사도는 -1~1 범위의 코사인 점수이며 확률이 아닙니다. 낮은 점수를 숨기는 기준은 자료 종류와 검색 목적에 맞춰 조정합니다.
+
+### 이전 버전에서 갱신하기
+
+0.2.2의 미디어 전처리는 이전 벡터와 호환되지 않습니다. 백엔드를 중지하고 새 버전으로 연결한 뒤 설정 탭에서 생성 인덱스를 초기화하고 다시 색인합니다. 원본 에셋과 모델 파일은 초기화 대상이 아닙니다.
+
+## 측정 결과
+
+2026-10-28, Windows 11, RTX 5080 16 GB, RAM 32 GB, 768차원 CUDA BF16 측정입니다. 모델이 로드된 상태이며 색인 시간에서 Unity import·미리보기 준비·프로세스 시작을 제외했습니다. 검색 시간에는 HTTP 왕복을 포함하고 UI 표시는 제외합니다.
+
+| 데이터와 경로 | 색인 | 새 검색어 p50 / p95 | 해석 |
+|---|---:|---:|---|
+| 직접 만든 134개, Unity 통합 경로, 0.2.0 | 2.616초 | 42.37 / 49.93ms | 문서 130개·도형 2개·톤 2개로 기능과 지연 측정 |
+| 실제 리소스 192개, 제품 HTTP/Engine, 0.2.2 | 14.56초 | 46.33 / 58.85ms | 텍스트·이미지·오디오 각 64개, 426벡터 |
+
+데이터와 버전이 달라 두 행을 개선율 비교에 사용할 수 없습니다. 실제 1천·5천·1만개 전체를 임베딩한 속도는 아직 측정하지 않았습니다. [측정 조건·원본·재현](Documentation~/BENCHMARKS.md), [검색 품질과 오디오 모델 비교](Documentation~/QUALITY.md), [메모리 점검](Documentation~/MEMORY.md)을 확인하세요.
+
+파일명을 가린 새 이미지 표본에서는 내용 기준 질의 9개 모두 관련 이미지가 1위였습니다. 오디오는 같은 수준의 독립 청취 정답이 없어 정확도를 확정하지 못했습니다. 효과음 전용 CLAP Q8은 소규모 자동 참조 비교에서 더 낮은 CPU 비용을 보였지만 제품에는 통합하지 않았습니다. 현재 모델은 EmbeddingGemma 2를 유지합니다.
+
+## AI 에이전트에서 호출
+
+`Agent~/mcp_server.py --project <Unity project>`를 MCP stdio 서버로 등록합니다. Unity에서 모델 연결과 색인을 준비하면 다음 도구를 호출할 수 있습니다.
 
 ```text
 unity_asset_status({})
 unity_asset_search({"query":"a red square", "kind":"image", "top":5})
 ```
 
-CLI도 사용할 수 있습니다. Python 표준 라이브러리만 필요합니다.
+CLI는 Python 표준 라이브러리만 사용합니다.
 
 ```powershell
 python "<package>/Agent~/search.py" --project "<project>" --query "a metal sword" --kind text --top 10
 ```
 
-[MCP 설정·C# Editor API](Agent~/README.md)와 [선택적 에이전트 스킬](Agent~/skills/unity-asset-search/SKILL.md)을 제공합니다. 읽기 전용 에이전트 자격 증명은 검색·상태 조회만 허용하고 에디터의 최신 포함/제외 범위를 서버가 강제합니다. 색인 작업도 Unity main thread에서 공개 C# API로 직접 실행할 수 있습니다. 전역 에이전트 설정은 자동 변경하지 않습니다.
+[MCP 설정·필터·C# API](Agent~/README.md)와 [선택적 에이전트 스킬](Agent~/skills/unity-asset-search/SKILL.md)을 제공합니다. 에이전트 자격 증명은 검색·상태 조회만 허용하고 서버가 에디터의 포함/제외 범위를 적용합니다. 색인과 설정 변경은 에디터 또는 Unity main thread의 공개 C# API를 사용합니다.
 
-## 성능과 구현 수준
+## 저장 위치와 제한
 
-0.2.2부터 이미지·오디오에는 파일명과 가까운 두 폴더의 이름을 원본 콘텐츠와 함께 임베딩합니다. 짧은 효과음과 기술 텍스처의 검색 맥락을 보완하며, 파일명이 부정확하면 결과에도 영향을 줄 수 있습니다. 점수는 계속 코사인 유사도입니다. **이전 버전의 생성 인덱스는 설정 탭에서 초기화한 뒤 다시 색인해야 합니다.** 기존 벡터와 자동으로 섞지 않습니다. 실제 표본의 전후 비교와 한계는 [검색 품질 점검](Documentation~/QUALITY.md)에 있습니다.
+| 항목 | 위치 |
+|---|---|
+| 프로젝트 설정 | `UserSettings/LocalAssetSearch.asset` |
+| 격리 환경·인덱스·미리보기·진단·에이전트 접속 정보 | `Library/LocalAssetSearch/` |
+| 모델 | 사용자가 지정한 폴더 |
 
-실제 모델과 Unity 수집·미리보기·HTTP·SQLite 경로로 측정했습니다. [벤치마크 원본과 재현 방법](Documentation~/BENCHMARKS.md)을 확인하세요. 짧은 합성 자료 결과이므로 실제 대규모 프로젝트의 검색 정확도나 처리량을 보장하지 않습니다.
+생성 데이터와 접속 정보는 Git에 넣지 마세요. 에셋 내용은 설치·추론 과정에서 외부로 전송하지 않으며 네트워크는 명시적 환경 설치와 모델 다운로드에 사용합니다.
 
-- CUDA 텍스트 배치 64, CPU 8, 이미지 4, 오디오 2; 메모리 부족 시 배치를 절반으로 줄입니다. 텍스트·오디오 청크는 개별 파일 단위로 원자적으로 저장합니다.
-- 내용 해시 기반 증분 색인, importer 설정을 바꾸지 않는 이미지 미리보기 캐시, 64개 검색어 벡터 캐시를 사용합니다.
-- SQLite에서 범위·제외·종류를 먼저 적용한 뒤 벡터를 읽고 정확한 코사인 순위를 계산합니다. BF16 출력은 FP32에서 다시 정규화합니다.
-- 취소, 항목별 실패 격리, 모델/차원/전처리/라이브러리 지문 불일치 감지, 프로세스 수명 관리, UTF-8 stdout/stderr와 JSON, 한국어/영어 로케일 검증을 포함합니다.
+선택 범위는 기본 1,000개, 상한 10,000개입니다. 범위를 먼저 좁힌 뒤 정확한 코사인 순위를 계산하며 ANN 인덱스는 없습니다. 비디오, AnimationClip 내용 분석, 프리팹·3D 렌더링, 자동 변경 감시, macOS MPS는 지원하지 않습니다. 비 Windows 실행, 밝은 테마 실제 화면, GPU 메모리 고갈 복구, 장시간 대규모 사용은 미검증입니다.
 
-상용 대규모 검색 엔진을 완성했다는 의미는 아닙니다. 최대 10,000개 에셋의 선택 범위와 정확 탐색을 기준으로 구현했습니다. ANN, 자동 파일 변경 감시, 비디오, AnimationClip 분석, 3D/프리팹 렌더링, macOS MPS, Linux/macOS 실제 실행 검증은 포함하지 않습니다. GPU OOM 축소 경로는 실제 OOM 유발 실험을 하지 않았습니다.
+## 문서와 개발
 
-메모리·프로세스 수명 점검은 [수정 전후 수치와 재현 방법](Documentation~/MEMORY.md)에 정리했습니다. 0.2.0에서 재현된 모델 재로딩 시 VRAM 누적과 종료 후 자식 프로세스 잔류를 수정한 버전은 **0.2.1**입니다. 이 점검은 장시간·대규모 프로젝트에서의 무누수를 보장하지 않습니다.
+| 문서 | 내용 |
+|---|---|
+| [문제 해결](Documentation~/TROUBLESHOOTING.md) | 설치·다운로드·색인·검색·로그·MCP 문제 |
+| [벤치마크](Documentation~/BENCHMARKS.md) | 장비, 웜 상태, 캐시, 재현 명령 |
+| [검색 품질](Documentation~/QUALITY.md) | 파일명 제거 실험과 오디오 비교의 한계 |
+| [호환성](Documentation~/COMPATIBILITY.md) | Unity 버전별 확인 범위 |
+| [기술 계약](Documentation~/README.md) | 형식, 청크, HTTP, 인덱스 수명 |
+| [Todo](Documentation~/TODO.md) | 완료 범위와 남은 과제 |
+| [기여 안내](CONTRIBUTING.md) | 테스트 실행과 버그 제보 |
+| [변경 이력](CHANGELOG.md) | 버전별 변경 |
 
-## 호환성·저장 위치
+## 라이선스와 참고
 
-UPM의 최소 선언은 Unity 2021.3입니다. 실제 버전별 검증과 미검증 범위는 [호환성 표](Documentation~/COMPATIBILITY.md)에 따릅니다. 이후 Unity 버전 전체를 보장하지 않습니다.
+패키지 코드와 직접 만든 Quick Start 샘플은 [MIT](LICENSE.md)입니다. 모델 가중치는 포함하지 않으며 [google/embeddinggemma-2](https://huggingface.co/google/embeddinggemma-2)의 별도 이용 조건을 따릅니다. 고정 리비전은 `914f7f89142e33e77833254d9c9b90c3cef7303b`입니다. 설치되는 Python 라이브러리에도 각 라이선스가 적용됩니다.
 
-설정은 `UserSettings/LocalAssetSearch.asset`, 생성 데이터·격리 환경·에이전트 접속 정보는 `Library/LocalAssetSearch/`에 저장합니다. 모델은 사용자가 지정한 별도 폴더에 둡니다. 이 파일들을 소스 관리에 포함하지 마세요. 에셋 내용은 설치/추론 과정에서 외부로 보내지 않습니다. 네트워크는 명시적 환경 설치와 모델 다운로드에만 사용합니다.
-
-자세한 형식·제한·HTTP 경계는 [기술 안내](Documentation~/README.md)에 있습니다. 다운로드가 모델 동의나 인증을 요구하면 Hugging Face 표준 절차를 사용하세요. 패키지 UI에 토큰을 저장하지 않습니다.
-
-## 참고
-
-[ayutaz/unity-embeddinggemma-2](https://github.com/ayutaz/unity-embeddinggemma-2)는 Sentis 접근을 비교한 참고 자료입니다. 이 패키지는 별도 구현이며 해당 저장소의 검증 결과를 승계하지 않습니다. 모델은 [google/embeddinggemma-2](https://huggingface.co/google/embeddinggemma-2), 리비전 `914f7f89142e33e77833254d9c9b90c3cef7303b`입니다. 가중치는 배포하지 않으며 원본 모델의 배포 조건이 적용됩니다. 샘플 이미지·문서·톤은 이 패키지 검증을 위해 직접 만든 자료입니다.
+[ayutaz/unity-embeddinggemma-2](https://github.com/ayutaz/unity-embeddinggemma-2)를 접근 방식의 참고 자료로 사용했습니다. 이 패키지는 별도 구현이며 해당 프로젝트의 검증 결과를 승계하지 않습니다. 한국어 문서는 [ai-slop-thresher](https://github.com/Burntgogi/ai-slop-thresher)의 윤문 지침을 적용해 다듬었습니다.
