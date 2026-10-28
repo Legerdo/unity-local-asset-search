@@ -6,6 +6,7 @@ The protocol is documented in Documentation~/README.md.
 from __future__ import annotations
 
 import argparse
+import gc
 import hashlib
 import hmac
 import json
@@ -16,6 +17,7 @@ import threading
 import time
 from contextlib import contextmanager
 from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 MODEL_ID = "google/embeddinggemma-2"
@@ -23,6 +25,9 @@ MODEL_REVISION = "914f7f89142e33e77833254d9c9b90c3cef7303b"
 RECIPE = "asset-search-v2-fp32-l2:text1800-overlap200,image1024,audio20s-overlap2-16k"
 TEXT_EXTS = {".txt", ".md", ".json", ".csv", ".xml", ".yaml", ".yml", ".cs", ".shader", ".compute", ".uss", ".uxml", ".lua"}
 MAX_BODY = 8 * 1024 * 1024
+# Native inference pools are tied to the executing thread. HTTP requests have
+# short-lived threads; reuse one lazy model worker across loading and inference.
+MODEL_WORKER = ThreadPoolExecutor(max_workers=1, thread_name_prefix="asset-inference")
 
 
 def validate_model(folder):
@@ -158,11 +163,14 @@ class Engine:
             row = db.execute("SELECT value FROM meta WHERE key='fingerprint'").fetchone()
             if row and row[0] != fingerprint:
                 raise ValueError("Model/preprocessing changed. Clear the generated index before reindexing.")
-        model = SentenceTransformer(str(self.model_dir), device=device, local_files_only=True,
-                                    trust_remote_code=False, model_kwargs={"torch_dtype": dtype})
-        for kind in ("image", "audio"):
-            if not model.supports(kind):
-                raise ValueError("Installed backend does not support " + kind)
+        def construct():
+            model = SentenceTransformer(str(self.model_dir), device=device, local_files_only=True,
+                                        trust_remote_code=False, model_kwargs={"torch_dtype": dtype})
+            for kind in ("image", "audio"):
+                if not model.supports(kind):
+                    raise ValueError("Installed backend does not support " + kind)
+            return model
+        model = MODEL_WORKER.submit(construct).result()
         self.model = model
         self.device = device
         self.fingerprint = fingerprint
@@ -175,29 +183,40 @@ class Engine:
             count = db.execute("SELECT count(*) FROM assets").fetchone()[0]
         values = dict(self.snapshot(), count=count, device=self.device, dimensions=self.dim,
                       model_loaded=self.model is not None, load_seconds=self.load_seconds,
-                      hash_seconds=self.hash_seconds, elapsed_seconds=self.elapsed_seconds)
+                      hash_seconds=self.hash_seconds, elapsed_seconds=self.elapsed_seconds,
+                      query_cache_entries=len(self.query_cache))
         if values["running"] and self.job_started is not None:
             values["elapsed_seconds"] = time.perf_counter() - self.job_started
-        if self.model is not None and self.device == "cuda":
+        if self.device == "cuda":
             import torch
-            values["gpu_allocated_mb"] = torch.cuda.memory_allocated() / 1048576
-            values["gpu_peak_mb"] = torch.cuda.max_memory_allocated() / 1048576
+            if torch.cuda.is_initialized():
+                values["gpu_allocated_mb"] = torch.cuda.memory_allocated() / 1048576
+                values["gpu_reserved_mb"] = torch.cuda.memory_reserved() / 1048576
+                values["gpu_peak_mb"] = torch.cuda.max_memory_allocated() / 1048576
         return values
 
     def encode_many(self, data, prompt="", batch_size=16):
+        self.load()
+        return MODEL_WORKER.submit(self._encode_many, data, prompt, batch_size).result()
+
+    def _encode_many(self, data, prompt, batch_size):
         import numpy as np
         import torch
-        self.load()
-        try:
-            vectors = np.asarray(self.model.encode(data, prompt=prompt, batch_size=batch_size,
-                normalize_embeddings=True, truncate_dim=self.dim, show_progress_bar=False), dtype="<f4").reshape(len(data), -1)
-        except torch.OutOfMemoryError:
-            if batch_size <= 1:
-                raise
+        while True:
+            try:
+                vectors = np.asarray(self.model.encode(data, prompt=prompt, batch_size=batch_size,
+                    normalize_embeddings=True, truncate_dim=self.dim, show_progress_bar=False), dtype="<f4").reshape(len(data), -1)
+            except torch.OutOfMemoryError:
+                if batch_size <= 1:
+                    raise
+                batch_size = max(1, batch_size // 2)
+            else:
+                return normalized_vectors(vectors, len(data), self.dim)
+            # Leave the exception block before retrying: its traceback can own GPU
+            # temporaries that empty_cache cannot release while the traceback is alive.
+            gc.collect()
             if self.device == "cuda":
                 torch.cuda.empty_cache()
-            return self.encode_many(data, prompt, max(1, batch_size // 2))
-        return normalized_vectors(vectors, len(data), self.dim)
 
     def encode(self, data, prompt=""):
         return self.encode_many([data], prompt, 1)[0]
@@ -340,10 +359,18 @@ class Engine:
                             continue
                         with self.job_lock:
                             self.job["current"] = prepared[0][0]["path"]
+                        batch_failed = False
                         try:
                             vectors = self.encode_many(documents, batch_size=batch_size)
                         except Exception:
+                            batch_failed = True
+                        if batch_failed:
                             # Isolate an invalid item instead of failing unrelated assets in its batch.
+                            # The failed batch's traceback must be gone before allocating again.
+                            gc.collect()
+                            if self.device == "cuda":
+                                import torch
+                                torch.cuda.empty_cache()
                             for item, checksum, parts, _ in prepared:
                                 try:
                                     single = self.encode_many([data for _, data in parts], batch_size=1)
@@ -453,10 +480,26 @@ class Engine:
             db.execute("DELETE FROM vectors")
             db.execute("DELETE FROM assets")
             db.execute("DELETE FROM meta")
-            self.model = None
             self.fingerprint = None
-            self.query_cache.clear()
+            self.unload()
         return {"ok": True}
+
+    def unload(self):
+        """Caller holds self.lock. Release model cycles without deleting the index."""
+        self.query_cache.clear()
+        # SentenceTransformers' model-card metadata owns a back-reference. Break
+        # it explicitly: collecting the module tree alone leaves native weights
+        # reachable in the validated backend, even after a full GC collection.
+        card = getattr(self.model, "model_card_data", None)
+        if card is not None and getattr(card, "model", None) is self.model:
+            card.model = None
+        self.model = None
+        gc.collect()
+        if self.device == "cuda":
+            import torch
+            if torch.cuda.is_initialized():
+                torch.cuda.synchronize()
+                torch.cuda.empty_cache()
 
 
 def make_handler(engine, token, agent_token=""):
@@ -547,6 +590,48 @@ def main():
     if len(token) < 32:
         raise ValueError("Editor session token is required")
     engine = Engine(args)
+    ready = engine.state / "ready.json"
+    agent_file = engine.state / "agent-connection.json"
+
+    def remove_owned_connection_files():
+        for path in (ready, agent_file):
+            try:
+                if json.loads(path.read_text("utf-8")).get("pid") == os.getpid():
+                    path.unlink(missing_ok=True)
+            except (OSError, ValueError):
+                pass
+
+    def parent_watch():
+        try:
+            if os.name == "nt":
+                # Blocking CRT/buffered reads can lock stdin while native imports
+                # inspect it. Probe the Editor's pipe without reading or locking
+                # the Python stream, including during a cold import/startup.
+                import ctypes
+                from ctypes import wintypes
+                kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+                kernel.GetStdHandle.restype = wintypes.HANDLE
+                kernel.PeekNamedPipe.argtypes = [wintypes.HANDLE, ctypes.c_void_p, wintypes.DWORD,
+                                                 ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+                kernel.PeekNamedPipe.restype = wintypes.BOOL
+                handle = kernel.GetStdHandle(-10)  # STD_INPUT_HANDLE
+                while kernel.PeekNamedPipe(handle, None, 0, None, None, None):
+                    time.sleep(.1)
+                if ctypes.get_last_error() not in (109, 232):  # broken/closing pipe
+                    raise ctypes.WinError(ctypes.get_last_error())
+            else:
+                while os.read(0, 1):
+                    pass
+        finally:
+            # Native inference/destructors can block interpreter teardown. This
+            # process is exclusively Editor-owned; exit on its pipe closing and
+            # let the OS reclaim CUDA/native allocations. SQLite rolls back any
+            # incomplete per-asset transaction without changing source assets.
+            remove_owned_connection_files()
+            os._exit(0)
+
+    threading.Thread(target=parent_watch, daemon=True).start()
+
     if os.environ.get("UNITY_EMBEDDING_DIAGNOSTICS") == "1":
         import faulthandler
         trace = open(engine.state / "diagnostics.log", "w")
@@ -565,30 +650,21 @@ def main():
     server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(engine, token, agent_token))
     server.daemon_threads = True
     server.timeout = 1
-    ready = engine.state / "ready.json"
     pending_ready = ready.with_suffix(".tmp")
     pending_ready.write_text(json.dumps({"port": server.server_port, "pid": os.getpid(), "session": args.session_id}), "utf-8")
     pending_ready.replace(ready)
-    agent_file = engine.state / "agent-connection.json"
     if agent_token:
         agent_file.write_text(json.dumps({"protocol": 1, "host": "127.0.0.1", "port": server.server_port,
             "token": agent_token, "pid": os.getpid()}), "utf-8")
         if os.name != "nt":
             agent_file.chmod(0o600)
-    # Lifetime belongs to the Editor. A reload/exit closes redirected stdin.
-    def parent_watch():
-        try:
-            import sys
-            sys.stdin.buffer.read()
-        finally:
-            server.shutdown()
-    threading.Thread(target=parent_watch, daemon=True).start()
     try:
         server.serve_forever()
     finally:
         server.server_close()
-        ready.unlink(missing_ok=True)
-        agent_file.unlink(missing_ok=True)
+        with engine.lock:
+            engine.unload()
+        remove_owned_connection_files()
 
 
 if __name__ == "__main__":

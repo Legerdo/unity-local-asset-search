@@ -4,6 +4,8 @@ import sqlite3
 import tempfile
 import time
 import unittest
+import gc
+import weakref
 import numpy as np
 import server
 
@@ -91,6 +93,90 @@ class IndexTests(unittest.TestCase):
         for invalid in (np.zeros((1, 4)), np.full((1, 4), np.nan)):
             with self.assertRaisesRegex(ValueError, "invalid embedding"):
                 server.normalized_vectors(invalid, 1, 4)
+
+    def test_clear_releases_cyclic_model_references(self):
+        class CyclicModel:
+            pass
+        model = CyclicModel(); model.owner = model
+        reference = weakref.ref(model); self.engine.model = model; del model
+        gc.disable()
+        try:
+            self.engine.clear()
+            self.assertIsNone(reference(), "Model reference cycle survived clear")
+        finally:
+            gc.enable(); gc.collect()
+
+    def test_clear_detaches_model_card_back_reference(self):
+        from types import SimpleNamespace
+        class Model:
+            pass
+        model = Model()
+        card = SimpleNamespace(model=model)
+        model.model_card_data = card
+        reference = weakref.ref(model); self.engine.model = model; del model
+        self.engine.clear()
+        self.assertIsNone(card.model)
+        self.assertIsNone(reference(), "Model-card metadata still retains the unloaded model")
+
+    def test_model_reloads_and_inference_share_one_worker(self):
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+        from unittest.mock import patch
+        calls = []
+        barrier = threading.Barrier(3)
+        class Model:
+            def supports(self, kind): return True
+            def encode(self, data, **kwargs):
+                calls.append(threading.get_ident())
+                return np.tile(np.array([1, 0, 0, 0], dtype="<f4"), (len(data), 1))
+        def construct(*args, **kwargs):
+            calls.append(threading.get_ident()); return Model()
+        def request():
+            barrier.wait(timeout=10)
+            with self.engine.lock:
+                server.Engine.encode_many(self.engine, ["a sword"])
+                self.engine.unload()
+        self.engine.load = server.Engine.load.__get__(self.engine)
+        with patch("sentence_transformers.SentenceTransformer", side_effect=construct):
+            with ThreadPoolExecutor(max_workers=3) as requests:
+                list(requests.map(lambda _: request(), range(3)))
+        self.assertEqual(len(calls), 6)
+        self.assertEqual(len(set(calls)), 1, "Each request creates new native loader thread resources")
+
+    def test_oom_retry_does_not_retain_failed_inference_traceback(self):
+        import torch
+        references = []
+        class Payload:
+            pass
+        class Model:
+            def encode(self, data, **kwargs):
+                if kwargs["batch_size"] > 2:
+                    temporary = Payload(); references.append(weakref.ref(temporary))
+                    raise torch.OutOfMemoryError("test-only simulated OOM")
+                if any(ref() is not None for ref in references):
+                    raise AssertionError("Failed inference traceback still retains temporary buffers")
+                return np.tile(np.array([1, 0, 0, 0], dtype="<f4"), (len(data), 1))
+        self.engine.model = Model()
+        self.engine.load = lambda: None
+        self.engine.encode_many = server.Engine.encode_many.__get__(self.engine)
+        # Invoke the real retry implementation, not the deterministic fixture's encode override.
+        result = server.Engine.encode_many(self.engine, ["a", "b", "c"], batch_size=8)
+        self.assertEqual(result.shape, (3, 4))
+
+    def test_failed_batch_releases_traceback_before_per_asset_fallback(self):
+        references = []
+        class Payload:
+            pass
+        def encode(data, prompt="", batch_size=16):
+            if batch_size > 1:
+                temporary = Payload(); references.append(weakref.ref(temporary))
+                raise ValueError("test-only failed batch")
+            if any(ref() is not None for ref in references):
+                raise AssertionError("Failed batch still owns temporary inference buffers")
+            return np.tile(np.array([1, 0, 0, 0], dtype="<f4"), (len(data), 1))
+        self.engine.encode_many = encode
+        result = self.run_index(self.items(3))
+        self.assertEqual((result["updated"], result["failed"]), (3, 0), result["errors"])
 
     def test_score_sort_path_and_extension_filters(self):
         items = self.items(3); self.run_index(items)

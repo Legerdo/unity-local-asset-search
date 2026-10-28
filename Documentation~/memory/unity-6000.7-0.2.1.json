@@ -1,0 +1,140 @@
+{
+    "unity": "6000.7.0a6",
+    "passed": true,
+    "preview_resources_stable": true,
+    "window_callbacks_released": true,
+    "process_stops": true,
+    "reload_process_released": true,
+    "interrupted_index_recovered": true,
+    "window_cycles": 30,
+    "preview_exports": 100,
+    "windows": [
+        {
+            "phase": "windows-warmed",
+            "managed_bytes": 22900736,
+            "native_allocated_bytes": 640263629,
+            "textures": 728,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "windows-5",
+            "managed_bytes": 24150016,
+            "native_allocated_bytes": 640755550,
+            "textures": 728,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "windows-10",
+            "managed_bytes": 23482368,
+            "native_allocated_bytes": 640789708,
+            "textures": 728,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "windows-15",
+            "managed_bytes": 23412736,
+            "native_allocated_bytes": 640799499,
+            "textures": 728,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "windows-20",
+            "managed_bytes": 23511040,
+            "native_allocated_bytes": 640796784,
+            "textures": 728,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "windows-25",
+            "managed_bytes": 23519232,
+            "native_allocated_bytes": 640762411,
+            "textures": 728,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "windows-30",
+            "managed_bytes": 23609344,
+            "native_allocated_bytes": 640814235,
+            "textures": 728,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        }
+    ],
+    "previews": [
+        {
+            "phase": "previews-warmed",
+            "managed_bytes": 23592960,
+            "native_allocated_bytes": 641256385,
+            "textures": 730,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "previews-20",
+            "managed_bytes": 23584768,
+            "native_allocated_bytes": 641256610,
+            "textures": 730,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "previews-40",
+            "managed_bytes": 23588864,
+            "native_allocated_bytes": 641256610,
+            "textures": 730,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "previews-60",
+            "managed_bytes": 23584768,
+            "native_allocated_bytes": 641256610,
+            "textures": 730,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "previews-80",
+            "managed_bytes": 23588864,
+            "native_allocated_bytes": 641258658,
+            "textures": 730,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        },
+        {
+            "phase": "previews-100",
+            "managed_bytes": 23588864,
+            "native_allocated_bytes": 641264920,
+            "textures": 730,
+            "render_textures": 1,
+            "windows": 0,
+            "callbacks": 0
+        }
+    ],
+    "stopped_pids": [
+        47112,
+        59144,
+        48412,
+        58764,
+        53604
+    ],
+    "error": ""
+}

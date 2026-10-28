@@ -1,0 +1,62 @@
+[
+  {
+    "rounds": [],
+    "clears": [],
+    "reloads": [],
+    "passed": true,
+    "started_utc": "2026-10-28T02:39:18.870316+00:00",
+    "configuration": {
+      "rounds": 8,
+      "queries_per_round": 96,
+      "reloads": 3,
+      "early_stop": true
+    },
+    "lifetime": {
+      "forced_launcher_kill": false,
+      "children_remaining_after_stop": 0,
+      "observed_children": 2,
+      "remaining_pids": []
+    },
+    "elapsed_s": 0.5241347000001042
+  },
+  {
+    "rounds": [],
+    "clears": [],
+    "reloads": [],
+    "passed": true,
+    "started_utc": "2026-10-28T02:39:19.686718+00:00",
+    "configuration": {
+      "rounds": 8,
+      "queries_per_round": 96,
+      "reloads": 3,
+      "early_stop": true
+    },
+    "lifetime": {
+      "forced_launcher_kill": false,
+      "children_remaining_after_stop": 0,
+      "observed_children": 2,
+      "remaining_pids": []
+    },
+    "elapsed_s": 0.48633590000008553
+  },
+  {
+    "rounds": [],
+    "clears": [],
+    "reloads": [],
+    "passed": true,
+    "started_utc": "2026-10-28T02:39:20.394805+00:00",
+    "configuration": {
+      "rounds": 8,
+      "queries_per_round": 96,
+      "reloads": 3,
+      "early_stop": true
+    },
+    "lifetime": {
+      "forced_launcher_kill": false,
+      "children_remaining_after_stop": 0,
+      "observed_children": 2,
+      "remaining_pids": []
+    },
+    "elapsed_s": 0.5179877000000488
+  }
+]

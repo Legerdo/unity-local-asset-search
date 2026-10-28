@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+- Release model-card back-references and collect native/GPU allocations when clearing the generated index.
+- Reuse one worker for model loading and inference to prevent native threads and handles accumulating across HTTP-triggered reloads.
+- Drop failed inference tracebacks before OOM batch retries and per-asset fallback.
+- Detect the Editor input pipe closing during Windows startup without locking stdin; terminate the owned backend without waiting on native interpreter teardown.
+- Expose reserved GPU memory and query cache size in diagnostics; add repeatable real-model and Unity resource lifetime checks.
+
 ## 0.2.0
 
 - Replace the initial IMGUI window with localized UI Toolkit search/setup tabs and independently scrolling results.

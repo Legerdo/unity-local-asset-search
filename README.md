@@ -49,6 +49,8 @@ python "<package>/Agent~/search.py" --project "<project>" --query "a metal sword
 
 상용 대규모 검색 엔진을 완성했다는 의미는 아닙니다. 최대 10,000개 에셋의 선택 범위와 정확 탐색을 기준으로 구현했습니다. ANN, 자동 파일 변경 감시, 비디오, AnimationClip 분석, 3D/프리팹 렌더링, macOS MPS, Linux/macOS 실제 실행 검증은 포함하지 않습니다. GPU OOM 축소 경로는 실제 OOM 유발 실험을 하지 않았습니다.
 
+메모리·프로세스 수명 점검은 [수정 전후 수치와 재현 방법](Documentation~/MEMORY.md)에 정리했습니다. 0.2.0에서 재현된 모델 재로딩 시 VRAM 누적과 종료 후 자식 프로세스 잔류를 수정한 버전은 **0.2.1**입니다. 이 점검은 장시간·대규모 프로젝트에서의 무누수를 보장하지 않습니다.
+
 ## 호환성·저장 위치
 
 UPM의 최소 선언은 Unity 2021.3입니다. 실제 버전별 검증과 미검증 범위는 [호환성 표](Documentation~/COMPATIBILITY.md)에 따릅니다. 이후 Unity 버전 전체를 보장하지 않습니다.

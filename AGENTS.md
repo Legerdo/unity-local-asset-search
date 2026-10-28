@@ -7,6 +7,7 @@ Unity Editor 전용 UPM 패키지입니다. 기본 언어는 한국어이고 영
 - `Agent~/search.py`: 에디터가 실행한 서비스에 접근하는 읽기 전용 CLI. 아래 스킬을 참고하세요.
 - `Agent~/skills/unity-asset-search/SKILL.md`: 다른 AI 도구에 복사해 사용할 수 있는 선택적 스킬.
 - `Tools~/AssetSearchValidation.cs`: 별도 Unity 검증 프로젝트에서 실제 모델로 실행하는 통합 검증. 실행법과 측정 한계는 `Documentation~/BENCHMARKS.md`에 있습니다.
+- `Tools~/memory_stress.py`, `Tools~/MemoryValidation.cs`: 실제 모델 반복 검색/재로딩, Unity 창·미리보기·프로세스 수명 검증. 별도 검증 프로젝트에서 실행하며 범위와 해석은 `Documentation~/MEMORY.md`에 있습니다.
 
 동작을 수정할 때 명시적으로 선택한 Assets 범위, 제외 경로, 기존 모델 파일, 전역 Python 환경을 보존하세요. 모델/환경/인덱스/접속 토큰은 Git에 넣지 않습니다. 외부 업로드나 GitHub 게시를 자동 수행하지 마세요.
 

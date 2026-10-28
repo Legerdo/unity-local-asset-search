@@ -77,7 +77,8 @@ namespace LocalAssetSearch
         public string current, device;
         public string[] errors;
         public bool model_loaded;
-        public float elapsed_seconds, load_seconds, hash_seconds, gpu_allocated_mb, gpu_peak_mb;
+        public float elapsed_seconds, load_seconds, hash_seconds, gpu_allocated_mb, gpu_reserved_mb, gpu_peak_mb;
+        public int query_cache_entries;
     }
     [Serializable] internal sealed class Ready { public int port, pid; public string session; }
     [Serializable] internal sealed class ApiError { public string error; }

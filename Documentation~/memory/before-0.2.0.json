@@ -1,0 +1,180 @@
+{
+  "rounds": [
+    {
+      "phase": "round-1",
+      "private_mb": 7138.6171875,
+      "rss_mb": 2443.65625,
+      "handles": 514,
+      "threads": 69,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    },
+    {
+      "phase": "round-2",
+      "private_mb": 7139.0,
+      "rss_mb": 2443.9765625,
+      "handles": 514,
+      "threads": 69,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    },
+    {
+      "phase": "round-3",
+      "private_mb": 7139.0,
+      "rss_mb": 2444.09375,
+      "handles": 514,
+      "threads": 69,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    },
+    {
+      "phase": "round-4",
+      "private_mb": 7138.95703125,
+      "rss_mb": 2444.07421875,
+      "handles": 512,
+      "threads": 68,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    },
+    {
+      "phase": "round-5",
+      "private_mb": 7138.95703125,
+      "rss_mb": 2444.08203125,
+      "handles": 512,
+      "threads": 68,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    },
+    {
+      "phase": "round-6",
+      "private_mb": 7139.33984375,
+      "rss_mb": 2444.21484375,
+      "handles": 512,
+      "threads": 68,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    },
+    {
+      "phase": "round-7",
+      "private_mb": 7139.015625,
+      "rss_mb": 2444.12890625,
+      "handles": 508,
+      "threads": 68,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    },
+    {
+      "phase": "round-8",
+      "private_mb": 7146.6875,
+      "rss_mb": 2451.5625,
+      "handles": 508,
+      "threads": 68,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 64,
+      "model_loaded": true
+    }
+  ],
+  "clears": [
+    {
+      "phase": "clear-1",
+      "private_mb": 7146.6875,
+      "rss_mb": 2451.5625,
+      "handles": 508,
+      "threads": 68,
+      "allocated_mb": 1464.298828125,
+      "reserved_mb": 2840.0,
+      "query_cache": 0,
+      "model_loaded": false
+    },
+    {
+      "phase": "clear-2",
+      "private_mb": 8845.2109375,
+      "rss_mb": 2696.69921875,
+      "handles": 522,
+      "threads": 75,
+      "allocated_mb": 2887.34765625,
+      "reserved_mb": 4274.0,
+      "query_cache": 0,
+      "model_loaded": false
+    },
+    {
+      "phase": "clear-3",
+      "private_mb": 10516.72265625,
+      "rss_mb": 2933.3984375,
+      "handles": 536,
+      "threads": 82,
+      "allocated_mb": 4308.646484375,
+      "reserved_mb": 5708.0,
+      "query_cache": 0,
+      "model_loaded": false
+    }
+  ],
+  "reloads": [
+    {
+      "phase": "reload-1",
+      "private_mb": 8845.2109375,
+      "rss_mb": 2696.69921875,
+      "handles": 522,
+      "threads": 75,
+      "allocated_mb": 2887.34765625,
+      "reserved_mb": 4274.0,
+      "query_cache": 3,
+      "model_loaded": true
+    },
+    {
+      "phase": "reload-2",
+      "private_mb": 10516.72265625,
+      "rss_mb": 2933.3984375,
+      "handles": 536,
+      "threads": 82,
+      "allocated_mb": 4308.646484375,
+      "reserved_mb": 5708.0,
+      "query_cache": 3,
+      "model_loaded": true
+    },
+    {
+      "phase": "reload-3",
+      "private_mb": 12168.98828125,
+      "rss_mb": 3140.51171875,
+      "handles": 550,
+      "threads": 89,
+      "allocated_mb": 5729.4453125,
+      "reserved_mb": 7144.0,
+      "query_cache": 3,
+      "model_loaded": true
+    }
+  ],
+  "baseline": {
+    "phase": "warmed-baseline",
+    "private_mb": 7138.234375,
+    "rss_mb": 2443.171875,
+    "handles": 514,
+    "threads": 69,
+    "allocated_mb": 1464.298828125,
+    "reserved_mb": 2840.0,
+    "query_cache": 64,
+    "model_loaded": true
+  },
+  "lifetime": {
+    "forced_launcher_kill": true,
+    "children_remaining_after_stop": 1,
+    "remaining_pids": [
+      40544
+    ]
+  }
+}

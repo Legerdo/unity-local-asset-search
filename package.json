@@ -1,6 +1,6 @@
 {
   "name": "com.local.embedding-search",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "displayName": "Local Asset Embedding Search",
   "description": "Editor-only text, image and audio asset search using a separate local EmbeddingGemma 2 backend. No Sentis dependency.",
   "unity": "2021.3",

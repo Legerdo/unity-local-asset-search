@@ -1,5 +1,7 @@
 # Local Asset Search for Unity
 
+Memory and process lifetime fixes are included in **0.2.1**. Version 0.2.0 retained GPU weights across model reloads and could leave a backend child running after stop. See the [measured audit and reproduction commands](Documentation~/MEMORY.md) for evidence and limits.
+
 [한국어](README.md)
 
 An Editor-only UPM package for semantic search across local text, images and audio using EmbeddingGemma 2. Inference runs in an isolated Python process, with no Sentis, runtime component or render-pipeline dependency. Korean is the default UI language; select English in the window header.
