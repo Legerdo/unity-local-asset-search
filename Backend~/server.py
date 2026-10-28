@@ -11,6 +11,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 from pathlib import Path
 import sqlite3
 import threading
@@ -22,7 +23,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 MODEL_ID = "google/embeddinggemma-2"
 MODEL_REVISION = "914f7f89142e33e77833254d9c9b90c3cef7303b"
-RECIPE = "asset-search-v2-fp32-l2:text1800-overlap200,image1024,audio20s-overlap2-16k"
+RECIPE = "asset-search-v3-media-context-v1-fp32-l2:text1800-overlap200,image1024,audio20s-overlap2-16k"
 TEXT_EXTS = {".txt", ".md", ".json", ".csv", ".xml", ".yaml", ".yml", ".cs", ".shader", ".compute", ".uss", ".uxml", ".lua"}
 MAX_BODY = 8 * 1024 * 1024
 # Native inference pools are tied to the executing thread. HTTP requests have
@@ -81,6 +82,20 @@ def chunks(text, size=1800, overlap=200):
         yield start, text[start:start + size]
         if start + size >= len(text):
             break
+
+
+def media_document(item, payload):
+    """Embed bounded asset metadata together with the original media content.
+
+    Text comes first for SentenceTransformers' ordered multimodal input. Only
+    the filename and two project-relative parent names are used, never host paths.
+    """
+    path = Path(item["path"])
+    def readable(value):
+        return re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", value.replace("_", " ").replace("-", " "))
+    title = readable(path.stem)[:160]
+    folders = " / ".join(readable(p) for p in path.parts[-3:-1] if p != "Assets")[:240]
+    return {"text": f"title: {title} | text: {item['kind']} asset. Context: {folders}. ", **payload}
 
 
 def normalized_vectors(vectors, count, dimension):
@@ -251,7 +266,7 @@ class Engine:
             with Image.open(source) as image:
                 image = image.convert("RGB")
                 image.thumbnail((1024, 1024))
-                yield 0, {"image": image.copy()}
+                yield 0, media_document(item, {"image": image.copy()})
         else:
             import numpy as np
             import soundfile as sf
@@ -271,7 +286,7 @@ class Engine:
                         break
                     if audio.samplerate != 16000:
                         samples = librosa.resample(samples, orig_sr=audio.samplerate, target_sr=16000)
-                    yield offset, {"audio": {"array": np.asarray(samples), "sampling_rate": 16000}}
+                    yield offset, media_document(item, {"audio": {"array": np.asarray(samples), "sampling_rate": 16000}})
                     if offset + 20 >= duration:
                         break
 

@@ -1,5 +1,7 @@
 # Local Asset Search for Unity
 
+Version 0.2.2 embeds the asset name and two nearby folder names together with image/audio content. Rebuild the generated index after upgrading; the preprocessing fingerprint rejects older vectors. Scores remain cosine similarities. Metadata can help asset retrieval but misleading names can also hurt it. See the [paired real-resource quality audit](Documentation~/QUALITY.md).
+
 Memory and process lifetime fixes are included in **0.2.1**. Version 0.2.0 retained GPU weights across model reloads and could leave a backend child running after stop. See the [measured audit and reproduction commands](Documentation~/MEMORY.md) for evidence and limits.
 
 [한국어](README.md)

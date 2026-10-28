@@ -106,6 +106,32 @@ class IndexTests(unittest.TestCase):
         finally:
             gc.enable(); gc.collect()
 
+    def test_media_inputs_keep_signal_and_add_bounded_asset_context(self):
+        import soundfile as sf
+        from PIL import Image
+        folder = self.root / 'Assets/Selected/WaterEffects'
+        folder.mkdir()
+        wave = np.linspace(-.25, .25, 1600, dtype=np.float32)
+        sound = folder / 'Water_Splash.wav'
+        sf.write(sound, wave, 16000, subtype='FLOAT')
+        picture = folder / 'CloudNormal.png'
+        Image.new('RGB', (4, 4), (10, 20, 30)).save(picture)
+        for kind, path in [('audio', sound), ('image', picture)]:
+            item = {'path': path.relative_to(self.root).as_posix(), 'kind': kind}
+            offset, data = next(self.engine.inputs(item, path))
+            self.assertEqual(offset, 0)
+            self.assertEqual(next(iter(data)), 'text')
+            self.assertIn('Water Effects', data['text'])
+            self.assertNotIn(str(self.root), data['text'])
+            self.assertLess(len(data['text']), 460)
+            if kind == 'audio':
+                self.assertIn('title: Water Splash', data['text'])
+                np.testing.assert_array_equal(data['audio']['array'], wave)
+                self.assertEqual(data['audio']['sampling_rate'], 16000)
+            else:
+                self.assertIn('title: Cloud Normal', data['text'])
+                self.assertEqual(data['image'].getpixel((0, 0)), (10, 20, 30))
+
     def test_clear_detaches_model_card_back_reference(self):
         from types import SimpleNamespace
         class Model:

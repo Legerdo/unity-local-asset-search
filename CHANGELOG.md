@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- Embed readable asset names and nearby folder context together with image/audio content to improve asset retrieval and mixed-modality ranking.
+- Preserve waveform/image preprocessing and cosine score semantics; bump the preprocessing fingerprint so previous indexes require an explicit rebuild.
+- Add a regression check that media metadata retains original signal/pixels and excludes host paths. Document paired real-resource quality checks and their weak-label limitations.
+
 ## 0.2.1
 
 - Release model-card back-references and collect native/GPU allocations when clearing the generated index.
